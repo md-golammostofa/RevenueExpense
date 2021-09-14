@@ -1,0 +1,761 @@
+﻿
+@{
+    ViewBag.Title = "Revenue Expense Panel";
+}
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h4>আয় ও ব্যয়ের প্যানেল</h4>
+        <hr />
+    </div>
+    <div class="col-md-12">
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link active" id="nav-RevenueExpenseList" data-toggle="tab" href="#RevenueExpenseList" role="tab" aria-controls="RevenueExpenseList" aria-selected="true">আয় ও ব্যয়ের তালিকা</a>
+                <a class="nav-item nav-link" id="nav-RevenueExpenseEntry" data-toggle="tab" href="#RevenueExpenseEntry" role="tab" aria-controls="RevenueExpenseEntry" aria-selected="false">আয়/ব্যয় এন্ট্রি করুন</a>
+            </div>
+        </nav>
+    </div>
+    <div class="col-md-12">
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="RevenueExpenseList" role="tabpanel" aria-labelledby="nav-RevenueExpenseList">
+                <div class="row">
+                    <div class="col-md-12">
+                        @using (Html.BeginForm("GetRevenueExpenseReport", "Organization", FormMethod.Get, new { @target = "_blank" }))
+                        {
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <label for="ddlFundInfoForSearch" class="control-label font-weight-bold">ফান্ডঃ</label>
+                                    <select class="form-control form-control-sm" id="ddlFundInfoForSearch" name="FundInfo">
+                                        <option value="">ফান্ড সিলেক্ট করুন</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-7">
+                                    <label for="ddlFundDetailForSearch" class="control-label font-weight-bold">সাব-ফান্ডেরঃ</label>
+                                    <select class="form-control form-control-sm" id="ddlFundDetailForSearch" name="FundDetail">
+                                        <option value="">সাব-ফান্ড সিলেক্ট করুন</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label for="ddlFundDetailTypeForSearch" class="control-label font-weight-bold">খাতের ধরনঃ</label>
+                                    <select class="form-control form-control-sm" id="ddlFundDetailTypeForSearch" name="FundDetailType">
+                                        <option value="">খাত সিলেক্ট করুন</option>
+                                        <option value="Revenue">আয়</option>
+                                        <option value="Expense">ব্যয়</option>
+                                    </select>
+                                </div>
+                            </div>
+                            /**/
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <label for="dptFromDate" class="control-label font-weight-bold">তারিখ হইতেঃ</label>
+                                    <input type="date" id="dptFromDate" class="form-control" format="dd-MMM-yyyy" name="FromDate" />
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label for="dptToDate" class="control-label font-weight-bold">তারিখ পর্যন্তঃ</label>
+                                    <input type="date" id="dptToDate" class="form-control" format="dd-MMM-yyyy" name="ToDate" />
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label style="visibility:hidden">Rows Count</label>
+                                    <div>
+                                        <h3>
+                                            <label id="tbl-row-count">0</label>
+                                            <span style="font-size:x-small">(Rows)</span>
+                                        </h3>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label for="" class="control-label font-weight-bold" style="visibility:hidden">Report</label>
+                                    <div class="clearfix">
+                                        <button type="submit" class="btn btn-primary" id="btnReport">রিপোর্ট</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-12" id="revExDataContainer">
+                        @{Html.RenderAction("GetRevenueExpenseList", "Organization");}
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="RevenueExpenseEntry" role="tabpanel" aria-labelledby="nav-RevenueExpenseEntry">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form id="frmRevExp" action="">
+                            <input type="hidden" id="hdfRowIndex" value="" />
+                            @Html.AntiForgeryToken()
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <label for="ddlFundInfo" class="control-label font-weight-bold">ফান্ডঃ</label>
+                                    <select class="form-control form-control-sm" id="ddlFundInfo">
+                                        <option value="">ফান্ড সিলেক্ট করুন</option>
+                                    </select>
+                                    <span class="error hide required-FundNameBN">ফান্ডের নাম আবশ্যক</span>
+                                </div>
+                                <div class="form-group col-md-5">
+                                    <label for="ddlFundDetail" class="control-label font-weight-bold">সাব-ফান্ডেরঃ</label>
+                                    <select class="form-control form-control-sm" id="ddlFundDetail">
+                                        <option value="">সাব-ফান্ড সিলেক্ট করুন</option>
+                                    </select>
+                                    <span class="error hide required-FundDetailNameBN">সাব-ফান্ডের নাম আবশ্যক</span>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label for="dptDate" class="control-label font-weight-bold">তারিখঃ</label>
+                                    <input type="date" id="dptDate" class="form-control" format="dd-MMM-yyyy" />
+                                    <span class="error hide required-date">তারিখ আবশ্যক</span>
+                                    <span class="error hide invalid-date">ইনভেলিড তারিখ</span>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label for="txtAmount" class="control-label font-weight-bold">টাকার পরিমাণঃ</label>
+                                    <input type="number" value="" id="txtAmount" class="form-control" />
+                                    <span class="error hide required-amount">টাকার পরিমাণ আবশ্যক</span>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label for="txtPayFromOrPayTo" class="control-label font-weight-bold">বিল প্রদান/গ্রহন</label>
+                                    <input type="text" id="txtPayFromOrPayTo" class="form-control" />
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label for="txtRemark" class="control-label font-weight-bold">মন্তব্য</label>
+                                    <input type="text" id="txtRemark" class="form-control" />
+                                </div>
+                                <div class="form-group col-md-2 addtolist">
+                                    <label for="txtAmount" class="control-label font-weight-bold" style="visibility:hidden">Button</label>
+                                    <div>
+                                        <button type="button" class="btn btn-icon btn-info" title="লিস্টে এড করুন" id="btnAddToList"><b>+</b></button>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-3 updatelist hide">
+                                    <label for="txtAmount" class="control-label font-weight-bold" style="visibility:hidden">Button</label>
+                                    <div>
+                                        <button type="button" class="btn btn-icon btn-warning" title="আপডেট করুন" id="btnUpdateItem"><b>&#x2714;</b></button>
+
+                                        <button type="button" class="btn btn-icon btn-danger" title="আপডেট বাতিল করুন" id="btnCancelItem"><b>&#x2716;</b></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-12">
+                                    <table class="table table-bordered table-sm table-responsive-lg table-hover" id="tblRevExpEntry">
+                                        <thead>
+                                            <tr>
+                                                <th colspan="6">
+                                                    <label>মোট আয়ঃ <span id="totalRev">0</span></label>   |
+                                                    <label>মোট ব্যয়ঃ <span id="totalExp">0</span></label>   |
+                                                    <label>মোট টাকাঃ <span id="totalTaka">0</span></label>
+                                                </th>
+                                                <th colspan="3">
+                                                    <button type="submit" id="btnSubmit" title="সেভ করুন" class="btn btn-icon btn-success float-right">
+                                                        <i class="far fa-save"> সেভ করুন </i>
+                                                    </button>
+                                                </th>
+                                            </tr>
+                                            <tr class="btn-info text-center">
+                                                <th>SL No.</th>
+                                                <th class="hide">FundInfoId</th>
+                                                <th>ফান্ডের নাম</th>
+                                                <th class="hide">FundDetailId</th>
+                                                <th>সাব-ফান্ডের নাম</th>
+                                                <th class="hide">TypeName</th>
+                                                <th>খাতের ধরন</th>
+                                                <th>তারিখ</th>
+                                                <th>টাকার পরিমাণ</th>
+                                                <th>বিল প্রদান/গ্রহন</th>
+                                                <th>মন্তব্য</th>
+                                                <th>অ্যাকশান</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalRevEx" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header alert-success">
+                <h4 id="modalHeading" class="modal-title">আয়/ব্যয় আপডেট করুন</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="frmRevExUpdate">
+                    <input type="hidden" name="Id" id="hdfReExId" />
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="ddlFundInfoForUpdate" class="control-label font-weight-bold">ফান্ডঃ</label>
+                            <select class="form-control form-control-sm" id="ddlFundInfoForUpdate">
+                                <option value="">ফান্ড সিলেক্ট করুন</option>
+                            </select>
+                            <span class="error hide required-FundNameBNU">ফান্ডের নাম আবশ্যক</span>
+                        </div>
+                        <div class="form-group col-md-5">
+                            <label for="ddlFundDetailForUpdate" class="control-label font-weight-bold">সাব-ফান্ডেরঃ</label>
+                            <select class="form-control form-control-sm" id="ddlFundDetailForUpdate">
+                                <option value="">সাব-ফান্ড সিলেক্ট করুন</option>
+                            </select>
+                            <span class="error hide required-FundDetailNameBNU">সাব-ফান্ডের নাম আবশ্যক</span>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="dptDateForUpdate" class="control-label font-weight-bold">তারিখঃ</label>
+                            <input type="date" id="dptDateForUpdate" class="form-control" format="dd-MMM-yyyy" />
+                            <span class="error hide required-dateU">তারিখ আবশ্যক</span>
+                            <span class="error hide invalid-dateU">ইনভেলিড তারিখ</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-2">
+                            <label for="txtAmountForUpdate" class="control-label font-weight-bold">টাকার পরিমাণঃ</label>
+                            <input type="number" value="" id="txtAmountForUpdate" class="form-control" />
+                            <span class="error hide required-amountU">টাকার পরিমাণ আবশ্যক</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="txtPayFromOrPayToForUpdate" class="control-label font-weight-bold">বিল প্রদান/গ্রহন</label>
+                            <input type="text" id="txtPayFromOrPayToForUpdate" class="form-control" />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="txtRemarkForUpdate" class="control-label font-weight-bold">মন্তব্য</label>
+                            <input type="text" id="txtRemarkForUpdate" class="form-control" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer btn-light">
+                <div class="col-md-4">
+                    <div id="msg1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে সেভ হয়েছে।
+                    </div>
+                    <div id="msg2" class="alert alert-danger hide float-left">
+                        ডাটা সেভ হতে ব্যর্থ হয়েছে।
+                    </div>
+                </div>
+                <button type="button" class="btn btn-danger float-right" data-dismiss="modal" data-target="#"><i class="fas fa-times"></i> বাতিল করুন </button>
+
+                <button type="submit" class="btn btn-success float-right" id="btnUpdate"><i class="fas fa-save"></i> আপডেট করুন </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalReExDelete" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header btn-warning">
+                <h4 class="modal-title">আয়/ব্যয় ডিলেট করুন</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="delModalTxt">
+
+            </div>
+            <div class="modal-footer btn-light">
+                <div class="col-md-6">
+                    <div id="delmsg1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে ডিলেট হয়েছে
+                    </div>
+                    <div id="delmsg2" class="alert alert-danger hide float-left">
+                        ডাটা ডিলেট হতে ব্যর্থ হয়েছে
+                    </div>
+                </div>
+                <button type="button" class="btn btn-warning float-right" data-dismiss="modal" data-target="#"> না </button>
+                <button type="submit" class="btn btn-success float-right" id="btnDeleteRevEx"> হ্যাঁ </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+
+        // Tab 1 Implementation
+        var ddlFundInfoForSearch = $("#ddlFundInfoForSearch");
+        var ddlFundDetailForSearch = $("#ddlFundDetailForSearch");
+        var ddlFundDetailTypeForSearch = $("#ddlFundDetailTypeForSearch");
+        var dptToDate = $("#dptToDate");
+        var dptFromDate = $("#dptFromDate");
+
+        // Tab 2 Implementation //
+        var ddlFundInfo = $("#ddlFundInfo");
+        var ddlFundDetail = $("#ddlFundDetail");
+        var dptDate = $("#dptDate");
+        var txtAmount = $("#txtAmount");
+        var txtPayFromOrPayTo = $("#txtPayFromOrPayTo");
+        var txtRemark = $("#txtRemark");
+        var hdfRowIndex = $("#hdfRowIndex");
+
+        // Modal Element
+        var ddlFundInfoForUpdate = $("#ddlFundInfoForUpdate");
+        var ddlFundDetailForUpdate = $("#ddlFundDetailForUpdate");
+        var dptDateForUpdate = $("#dptDateForUpdate");
+        var txtAmountForUpdate = $("#txtAmountForUpdate");
+        var txtPayFromOrPayToForUpdate = $("#txtPayFromOrPayToForUpdate");
+        var txtRemarkForUpdate = $("#txtRemarkForUpdate");
+        var hdfReExId = $("#hdfReExId");
+
+        var tblRowCount = $("#tbl-row-count");
+
+        $(document).ready(function () {
+            LoadDropDown('/Common/GetFundInfoForDDL', 'POST', ddlFundInfo);
+            LoadDropDown('/Common/GetFundInfoForDDL', 'POST', ddlFundInfoForSearch);
+            LoadDropDown('/Common/GetFundInfoForDDL', 'POST', ddlFundInfoForUpdate);
+            fntableRowCount("tblRevenueExpenseList", "tbl-row-count");
+        })
+
+        // Start of Tab 1 //
+        ddlFundInfoForSearch.change(function () {
+            $('#ddlFundDetailForSearch option:not(:first)').remove();
+            if (ddlFundInfoForSearch.val() != "") {
+                LoadDropDown('/Common/GetFundDetailsForDDL', 'POST', ddlFundDetailForSearch, JSON.stringify({ FundInfoId: ddlFundInfoForSearch.val() }));
+            }
+            ajaxSerach();
+        })
+
+        ddlFundDetailForSearch.change(function () {
+            ajaxSerach();
+        })
+
+        ddlFundDetailTypeForSearch.change(function () {
+            ajaxSerach();
+        })
+
+        dptFromDate.change(function () {
+            ajaxSerach();
+        })
+
+        dptToDate.change(function () {
+            ajaxSerach();
+        })
+
+        ddlFundInfoForUpdate.change(function () {
+            $('#ddlFundDetailForUpdate option:not(:first)').remove();
+            if (ddlFundInfoForUpdate.val() != "") {
+                LoadDropDown('/Common/GetFundDetailsForDDL', 'POST', ddlFundDetailForUpdate, JSON.stringify({ FundInfoId: ddlFundInfoForUpdate.val() }));
+            }
+        })
+
+        $("a.data-edit-item").click(function (e) {
+            e.preventDefault();
+            var id = $(this).attr("data-edit-item");
+            //alert("RevEx "+ id)
+            clearModalControl();
+
+            $.when(getReqWithData(dataType.json, 'GET', '/Organization/GetRevenueExpenseById', { id: id })).then(function (res, status) {
+                console.log(res);
+                console.log(status);
+                if (res != null && status == "success") {
+                    OpenModal();
+                    ddlFundInfoForUpdate.val(res.FundInfoId);
+                    LoadDropDown4('/Common/GetFundDetailsForDDL', 'POST', ddlFundDetailForUpdate, JSON.stringify({ FundInfoId: res.FundInfoId }), res.FundDetailId);
+                    dptDateForUpdate.val(getDateFromJson(res.BillDate));
+                    txtAmountForUpdate.val(res.Amount);
+                    txtPayFromOrPayToForUpdate.val(res.PayFromOrPayTo);
+                    txtRemarkForUpdate.val(res.Remark);
+                    hdfReExId.val(res.RevExId);
+                }
+            }).fail(function (error) {
+                console.log(error);
+            })
+        })
+
+        $(document).on("click", "a.data-del-item", function (e) {
+            e.preventDefault();
+            var id = $(this).attr("data-del-item");
+            clearModalControl();
+            $("#modalReExDelete").modal("show");
+            $("#delModalTxt").empty();
+
+            var name = $(this).parent().parents('tr').find("td:eq(2)").html();
+            var dt = $(this).parent().parents('tr').find("td:eq(9)").html();
+            var amount = $(this).parent().parents('tr').find("td:eq(12)").html();
+            var txt = "<span> আপনি কি নিশ্চিতভাবে <b>" + name + " (" + amount + "/=) " + dt + "</b> এর ডাটা ডিলেট করতে চান?</span>";
+            hdfReExId.val(id);
+            $("#delModalTxt").append(txt);
+        })
+
+        $("#btnDeleteRevEx").click(function (e) {
+            e.preventDefault();
+            var id = TryParseInt(hdfReExId.val(), 0);
+            if (id > 0) {
+                disable("#btnDeleteRevEx");
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Organization/DeleteRevenueExpenseById', JSON.stringify({ id: id }), getToken())).then(function (res, status) {
+                    if (res == true) {
+                        message("#delmsg1", "#modalReExDelete");
+                    }
+                    else {
+                        message("#delmsg2");
+                    }
+                    enable("#btnDeleteRevEx");
+                }).fail(function (error) {
+                    console.log(error);
+                    alert(execuStatus.fail);
+                    enable("#btnDeleteRevEx");
+                })
+            }
+        })
+
+        function OpenModal() {
+            clearModalControl();
+            $("#modalRevEx").modal("show");
+            $(".error").addClass("hide");
+        }
+
+        function clearModalControl() {
+            hdfReExId.val('');
+            ddlFundInfoForUpdate.val('');
+            dptDateForUpdate.val('');
+            txtAmountForUpdate.val('0');
+            txtPayFromOrPayToForUpdate.val('');
+            txtRemarkForUpdate.val('')
+        }
+
+        function ajaxSerach() {
+            var data = { fundInfoId: TryParseInt(ddlFundInfoForSearch.val(), 0), fundDetailId: TryParseInt(ddlFundDetailForSearch.val(), 0), fundType: ddlFundDetailTypeForSearch.val(), fromDate: dptFromDate.val(), toDate: dptToDate.val() };
+            console.log(data);
+            tblRowCount.text('0');
+            $.when(getReqWithData('html', 'GET', '/Organization/GetRevenueExpenseList', data)).then(function (res, status) {
+                //console.log(res);
+                console.log(status);
+                if (status == "success") {
+                    $("#revExDataContainer").empty();
+                    $("#revExDataContainer").append(res);
+                    fntableRowCount("tblRevenueExpenseList", "tbl-row-count");
+                }
+            }).fail(function (error) {
+                console.log(error);
+                alert(execuStatus.fail);
+            })
+        }
+
+        function validateUpdate() {
+            $(".error").addClass("hide");
+            var isValid = true;
+            if (ddlFundInfoForUpdate.val() == '') {
+                $(".required-FundNameBNU").removeClass("hide");
+                isValid = false;
+            }
+            if (ddlFundDetailForUpdate.val() == '') {
+                $(".required-FundDetailNameBNU").removeClass("hide");
+                isValid = false;
+            }
+            if (dptDateForUpdate.val() == '') {
+                $(".required-dateU").removeClass("hide");
+                isValid = false;
+            }
+            if (txtAmountForUpdate.val() == '' || TryParseFloat(txtAmountForUpdate.val(), 0) <= 0) {
+                $(".required-amountU").removeClass("hide");
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        $("#btnUpdate").click(function (e) {
+            e.preventDefault();
+            if (TryParseInt(hdfReExId.val(), 0) > 0 && validateUpdate() == true) {
+                var revExpData = [];
+                revExpData.length = 0;
+                disable("#btnUpdate");
+                revExpData.push({
+                    RevExId: hdfReExId.val(),
+                    RevExName: $("#ddlFundDetailForUpdate option:selected").text(),
+                    FundInfoId: ddlFundInfoForUpdate.val(),
+                    FundDetailId: ddlFundDetailForUpdate.val(),
+                    Amount: txtAmountForUpdate.val(),
+                    PayFromOrPayTo: txtPayFromOrPayToForUpdate.val(),
+                    Remark: txtRemarkForUpdate.val(),
+                    BillDate: dptDateForUpdate.val()
+                })
+
+                var data = JSON.stringify({ model: revExpData });
+                console.log(data);
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Organization/SaveRevenueExpense', data, getToken())).then(function (res, status) {
+                    console.log(res);
+                    console.log(status);
+                    enable("#btnUpdate");
+                    if (res == true) {
+                        message("#msg1", "#modalRevEx");
+                    }
+                    else {
+                        message("#msg2");
+                    }
+                    enable("#btnUpdate");
+                }).fail(function (error) {
+                    enable("#btnUpdate");
+                    console.log(error);
+                })
+                enable("#btnUpdate");
+            }
+        })
+
+        // End of Tab 2 //
+
+        // Tab 2 Logical Implementation
+        ddlFundInfo.change(function () {
+            console.log(ddlFundInfo.val());
+            $('#ddlFundDetail option:not(:first)').remove();
+            if (ddlFundInfo.val() != "") {
+                LoadDropDown('/Common/GetFundDetailsForDDL', 'POST', ddlFundDetail, JSON.stringify({ FundInfoId: ddlFundInfo.val() }));
+            }
+        })
+
+        function validate() {
+
+            var isValid = true;
+            $(".error").addClass("hide");
+            if (ddlFundInfo.val() == "") {
+                $(".required-FundNameBN").removeClass("hide");
+                isValid = false;
+            }
+            if (ddlFundDetail.val() == "") {
+                $(".required-FundDetailNameBN").removeClass("hide");
+                isValid = false;
+            }
+            if (dptDate.val() == "") {
+                $(".required-date").removeClass("hide");
+                isValid = false;
+            }
+            if (txtAmount.val() == "" || TryParseFloat(txtAmount.val(), 0) <= 0) {
+                $(".required-amount").removeClass("hide");
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        $("#btnAddToList").click(function (e) {
+            e.preventDefault();
+            if (validate() == true) {
+                //tblRevExpEntry
+                var sl = $("#tblRevExpEntry tbody tr").length;
+                var td1 = "<td class='text-center'>" + (sl + 1) + "</td>"
+                var td2 = "<td class='hide'>" + ddlFundInfo.val() + "</td>"
+                var td3 = "<td>" + $("#ddlFundInfo option:selected").text() + "</td>"
+                var td4 = "<td class='hide'>" + ddlFundDetail.val() + "</td>";
+                var fundDetailText = $("#ddlFundDetail option:selected").text()
+                var fundDetailName = fundDetailText.substring(0, fundDetailText.lastIndexOf("("));
+                var fundDetailType = fundDetailText.substring(fundDetailText.lastIndexOf("(") + 1, fundDetailText.lastIndexOf(")"));
+                var type = "";
+
+                if (fundDetailType == "আয়") {
+                    type = "Revenue";
+                } else {
+                    type = "Expense";
+                }
+
+                var td5 = "<td>" + fundDetailName + "</td>";
+                var td6 = "<td>" + fundDetailType + "</td>";
+                var td7 = "<td class='hide'>" + type + "</td>";
+                var td8 = "<td>" + dptDate.val() + "</td>";
+                var td9 = "<td>" + txtAmount.val() + "</td>";
+                var td10 = "<td>" + txtPayFromOrPayTo.val() + "</td>";
+                var td11 = "<td>" + txtRemark.val() + "</td>";
+                var td12 = "<td><a href='#' class='btn btn-icon btn-sm btn-warning data-onfly-edit'><i class='far fa-edit'></i>এডিট</a> <a href='#' class='btn btn-sm btn-danger data-onfly-del'><i class='far fa-remove'></i> ডিলেট</a></td>";
+
+                var tr = "<tr>" + td1 + td2 + td3 + td4 + td5 + td6 + td7 + td8 + td9 + td10 + td11 + td12 + "</tr>";
+                $("#tblRevExpEntry tbody").append(tr);
+
+                // Total Revenue / Expense / Amount
+                var amt = parseFloat(txtAmount.val());
+                var total = TryParseFloat($("#totalTaka").text(), 0) + amt;
+                if (type == "Revenue") {
+                    amt = amt + TryParseFloat($("#totalRev").text(), 0);
+                    $("#totalRev").text(amt);
+                }
+                else {
+                    amt = amt + TryParseFloat($("#totalExp").text(), 0);
+                    $("#totalExp").text(amt);
+                }
+                $("#totalTaka").text(total);
+
+                clearControl();
+            }
+        })
+
+        $(document).on("click", "a.data-onfly-del", function (e) {
+            e.preventDefault();
+            var index = $(this).parent().parents('tbody tr').index();
+            removeTableRow("#tblRevExpEntry tbody", index);
+            fnFixTheTbodyRowSerial("#tblRevExpEntry", index);
+            Calcute(index);
+
+            $("#tblRevExpEntry tbody tr").removeClass("btn-success");
+            $(".updatelist").addClass("hide");
+            $(".addtolist").removeClass("hide");
+            clearControl();
+        })
+
+        function Calcute(index) {
+            var rev = 0;
+            var exp = 0;
+            $.each($("#tblRevExpEntry tbody tr"), function (idx, itm) {
+                if (idx != index) {
+                    if ($(this).find("td:eq(6)").html() == "Revenue") {
+                        rev = rev + TryParseFloat($(this).find("td:eq(8)").html(), 0);
+                    }
+                    else {
+                        exp = exp + TryParseFloat($(this).find("td:eq(8)").html(), 0);
+                    }
+                }
+            })
+            var total = rev + exp;
+            $("#totalTaka").text(total);
+            $("#totalRev").text(rev);
+            $("#totalExp").text(exp);
+        }
+
+        function clearControl() {
+            ddlFundInfo.val('');
+            ddlFundDetail.val('');
+            dptDate.val('');
+            txtAmount.val('0');
+            txtPayFromOrPayTo.val('');
+            txtRemark.val('');
+        }
+
+        $(document).on("click", "a.data-onfly-edit", function (e) {
+            hdfRowIndex.val('');
+            e.preventDefault();
+            $("#tblRevExpEntry tbody tr").removeClass("btn-success");
+            var tr = $(this).parent().parents('tbody tr');
+            tr.addClass("btn-success");
+            hdfRowIndex.val(tr.index());
+
+            ddlFundInfo.val(tr.find('td:eq(1)').html());
+            //ddlFundInfo.trigger("change");
+
+            var fdval = tr.find('td:eq(3)').html();
+            //ddlFundDetail.val(tr.find('td:eq(3)').html());
+            $('#ddlFundDetail option:not(:first)').remove();
+            LoadDropDown4('/Common/GetFundDetailsForDDL', 'POST', ddlFundDetail, JSON.stringify({ FundInfoId: ddlFundInfo.val() }), fdval);
+
+            dptDate.val(tr.find('td:eq(7)').html());
+            txtAmount.val(tr.find('td:eq(8)').html());
+            txtPayFromOrPayTo.val(tr.find('td:eq(9)').html());
+            txtRemark.val(tr.find('td:eq(10)').html());
+            $(".updatelist").removeClass("hide");
+            $(".addtolist").addClass("hide");
+        })
+
+        // Update on the fly.
+        $("#btnUpdateItem").click(function (e) {
+            e.preventDefault();
+
+            var tr = $("#tblRevExpEntry tbody tr").eq(hdfRowIndex.val())
+            tr.find('td:eq(1)').html(ddlFundInfo.val());
+            tr.find('td:eq(2)').html($("#ddlFundInfo option:selected").text());
+            tr.find('td:eq(3)').html(ddlFundDetail.val());
+            var fundDetailText = $("#ddlFundDetail option:selected").text()
+            var fundDetailName = fundDetailText.substring(0, fundDetailText.lastIndexOf("("));
+            var fundDetailType = fundDetailText.substring(fundDetailText.lastIndexOf("(") + 1, fundDetailText.lastIndexOf(")"));
+            var type = "";
+
+            if (fundDetailType == "আয়") {
+                type = "Revenue";
+            }
+            else {
+                type = "Expense";
+            }
+
+            tr.find('td:eq(4)').html(fundDetailName);
+            tr.find('td:eq(5)').html(fundDetailType);
+            tr.find('td:eq(6)').html(type);
+            tr.find('td:eq(7)').html(dptDate.val());
+            tr.find('td:eq(8)').html(txtAmount.val());
+            tr.find('td:eq(9)').html(txtPayFromOrPayTo.val());
+            tr.find('td:eq(10)').html(txtRemark.val());
+
+            Calcute(TryParseInt(hdfRowIndex.val(), 0));
+
+            var amt = parseFloat(txtAmount.val());
+            var total = TryParseFloat($("#totalTaka").text(), 0) + amt;
+            if (type == "Revenue") {
+                amt = amt + TryParseFloat($("#totalRev").text(), 0);
+                $("#totalRev").text(amt);
+            }
+            else {
+                amt = amt + TryParseFloat($("#totalExp").text(), 0);
+                $("#totalExp").text(amt);
+            }
+            $("#totalTaka").text(total);
+
+
+            hdfRowIndex.val('')
+            $("#tblRevExpEntry tbody tr").removeClass("btn-success");
+            $(".updatelist").addClass("hide");
+            $(".addtolist").removeClass("hide");
+            clearControl();
+        })
+
+        // Update cancel on the fly.
+        $("#btnCancelItem").click(function (e) {
+            e.preventDefault();
+            hdfRowIndex.val('0')
+            $("#tblRevExpEntry tbody tr").removeClass("btn-success");
+            $(".updatelist").addClass("hide");
+            $(".addtolist").removeClass("hide");
+        })
+
+        // Update
+        $("#btnSubmit").click(function (e) {
+            e.preventDefault();
+            if ($("#tblRevExpEntry tbody tr").length > 0) {
+                disable("#btnSubmit")
+                var revExpData = [];
+                revExpData.length = 0;
+                $.each($("#tblRevExpEntry tbody tr"), function (index, item) {
+                    console.log(item);
+                    var fid = $(this).find('td:eq(1)').html();
+                    var fdid = $(this).find('td:eq(3)').html();
+                    var fdName = $(this).find('td:eq(4)').html();
+                    var bDate = $(this).find('td:eq(7)').html();
+                    var amt = $(this).find('td:eq(8)').html();
+                    var payToOrFrm = $(this).find('td:eq(9)').html();
+                    var remark = $(this).find('td:eq(10)').html();
+
+                    revExpData.push({
+                        RevExId: 0,
+                        RevExName: fdName,
+                        FundInfoId: fid,
+                        FundDetailId: fdid,
+                        Amount: amt,
+                        PayFromOrPayTo: payToOrFrm,
+                        Remark: remark,
+                        BillDate: bDate
+                    })
+                })
+
+                var data = JSON.stringify(revExpData);
+                console.log(data);
+
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Organization/SaveRevenueExpense', data, getToken())).then(function (res, status) {
+                    console.log(res);
+                    console.log(status);
+                    enable("#btnSubmit");
+                    if (res == true) {
+                        alert("ডাটা সফলভাবে সেভ হয়েছে");
+                        $("#tblRevExpEntry tbody").empty();
+                        location.reload();
+                    }
+                    else {
+                        alert("ডাটা সেভ হতে ব্যর্থ হয়েছে")
+                    }
+                }).fail(function (error) {
+                    console.log(error);
+                })
+                enable("#btnSubmit");
+            }
+            else {
+                alert("লিস্টে আয়/ব্যয় সংযুক্ত করুন");
+            }
+        })
+
+                            //---- End of Tab 2//
+    </script>
+}

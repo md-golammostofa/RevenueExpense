@@ -1,0 +1,395 @@
+﻿@model IEnumerable<VmInvoiceInfo>
+@{
+    int sl = 0;
+}
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h4>আদায়কৃত বিলের তালিকা</h4>
+        <hr />
+    </div>
+    <div class="col-md-12">
+        @Html.AntiForgeryToken()
+        <div class="form-row">
+            <div class="form-group col-md-2">
+                @Html.DropDownList("ddlFloor", (IEnumerable<SelectListItem>)ViewBag.FloorList, "সিলেক্ট ফ্লোর", new { @class = "form-control" })
+            </div>
+            <div class="form-group col-md-3">
+                @*<select class="form-control" id="ddlHolding">
+                        <option value="">সিলেক্ট হোল্ডিং</option>
+                    </select>*@
+                <input type="hidden" id="hdfHoldingId" value="0" />
+                <input type="text" value="" id="txtSearchHolding" class="form-control" placeholder="হোল্ডিং নং লেখুন"/>
+            </div>
+            <div class="form-group col-md-3">
+                <select class="form-control" id="ddlShop">
+                    <option value="">সিলেক্ট শপ</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <h3>
+                    <label id="tbl-row-count">0</label>
+                    <span style="font-size:x-small">(Rows)</span>
+                </h3>
+            </div>
+            <div class="form-group col-md-2">
+                <a href="/Organization/CreateInvoice" class="btn btn-primary float-lg-right"><i class="fa fa-plus"></i>বিল আদায় করুন</a>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-2">
+                <label class="control-label font-weight-bold">তারিখ হইতেঃ</label>
+                <input type="date" class="form-control" id="dptFromDate" />
+            </div>
+            <div class="form-group col-md-2">
+                <label class="control-label font-weight-bold">তারিখ পর্যন্তঃ</label>
+                <input type="date" class="form-control" id="dptToDate" />
+            </div>
+            <div class="form-group col-md-2">
+                <label class="control-label font-weight-bold" style="visibility:hidden">Report</label>
+                <a href="#" class="btn btn-warning float-lg-right" id="btnReport"><i class="fa fa-file"></i>বিস্তারিত রিপোর্ট</a>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                <table class="table table-bordered table-sm table-responsive-lg" id="tblInvoiceList">
+                    <thead>
+                        <tr class="btn-info text-center">
+                            <th style="vertical-align:middle">SL</th>
+                            <th class="hide"></th>
+                            <th style="vertical-align:middle">বিল নং</th>
+                            <th style="vertical-align:middle">ফ্লোর নং</th>
+                            <th style="vertical-align:middle">হোল্ডিং নং</th>
+                            <th style="vertical-align:middle">শপ</th>
+                            <th style="vertical-align:middle">মোট জরিমানা ফি</th>
+                            <th style="vertical-align:middle">মোট সংযোগ ফি</th>
+                            <th style="vertical-align:middle">মোট চার্জ</th>
+                            <th style="vertical-align:middle">এন্ট্রি ইউজার</th>
+                            <th style="vertical-align:middle">এন্ট্রি ডেট</th>
+                            <th style="vertical-align:middle">অ্যাকশান</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            sl = sl + 1;
+                        <tr>
+                            <td class="text-center">@sl</td>
+                            <td class="hide">@item.Id</td>
+                            <td>@item.InvoiceNo</td>
+                            <td align="center">@item.FloorNo</td>
+                            <td>@item.HoldingNo</td>
+                            <td>@item.ShopName</td>
+                            <td dataval="@item.TotalFineAmount" align="right" class="font-weight-bold">@item.TotalFineAmountBN</td>
+                            <td dataval="@item.TotalConnectionFee" align="right" class="font-weight-bold">@item.TotalConnectionFeeBN</td>
+                            <td dataval="@item.TotalChargeAmount" align="right" class="font-weight-bold">@item.TotalChargeAmountBN</td>
+                            <td align="center">@item.EntryUser</td>
+                            <td align="center">@item.EntryDate.Value.ToString("dd-MMM-yyyy")</td>
+                            <td align="center">
+                                <a href="#" class="btn btn-success btn-sm data-view-item" data-view-item="@item.InvoiceNo">বিস্তারিত</a>
+                                <a href="#" class="btn btn-warning btn-sm data-item-report" data-item-report="@item.InvoiceNo">রিপোর্ট</a>
+                            </td>
+                        </tr>
+                        }
+                        @if (Model.Count() == 0)
+                        {
+                            <tr class="text-center empty-row">
+                                <td colspan="11">কোন ডাটা পাওয়া যায়নি...।</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalInvoiceDetails" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header alert-success">
+                <h4 id="modalHeading" class="modal-title">বিলের বিস্তারিত</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered table-sm table-responsive-lg font-weight-bold" id="tblInvInfo">
+                    <tr>
+                        <td>
+                            বিল নং
+                        </td>
+                        <td>
+                            <span id="invNo"></span>
+                        </td>
+                        <td>
+                            তারিখ
+                        </td>
+                        <td>
+                            <span id="invDate"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            শপের নাম
+                        </td>
+                        <td>
+                            <span id="shopName"></span>
+                        </td>
+                        <td>
+                            ঠিকানা
+                        </td>
+                        <td>
+                            <span id="address"></span>
+                        </td>
+                    </tr>
+                </table>
+                <br />
+                <table class="table table-bordered table-hover table-responsive-lg" id="tblInvDeatil">
+                    <thead class="table-info">
+                        <tr class="text-center">
+                            <th>SL No.</th>
+                            <th>মাস</th>
+                            <th>টোটাল চার্জ</th>
+                            <th>জরিমানা</th>
+                            <th>সংযোগ ফী</th>
+                            <th>মোট টাকা</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr class="font-weight-bold">
+                            <td colspan="2">
+                                মোট
+                            </td>
+                            <td align="right">
+                                <span id="totalChargeAmt">০</span>
+                            </td>
+                            <td align="right">
+                                <span id="totalFineAmt">০</span>
+                            </td>
+                            <td align="right">
+                                <span id="totalConAmt">০</span>
+                            </td>
+                            <td align="right">
+                                <span id="totalAmt">০</span>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="modal-footer btn-light">
+                <button type="button" class="btn btn-danger float-right" data-dismiss="modal" data-target="#"><i class="fas fa-times"></i> বন্ধ করুন </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script type="text/javascript">
+        var ddlFloor = $("#ddlFloor");
+        //var ddlHolding = $("#ddlHolding");
+        var txtSearchHolding = $("#txtSearchHolding");
+        var ddlShop = $("#ddlShop");
+        var tblRowCount = $("#tbl-row-count");
+        var hdfHoldingId = $("#hdfHoldingId");
+        var dptFromDate = $("#dptFromDate");
+        var dptToDate = $("#dptToDate");
+
+        $(document).ready(function () {
+            fntableRowCount("tblInvoiceList", "tbl-row-count");
+        })
+
+        ddlFloor.change(function () {
+            //clearDropdown("ddlHolding");
+            clearDropdown("ddlShop");
+            if (ddlFloor.val() != "") {
+                //LoadDropDown('/Common/GetHoldingsByFloorIdForDDL', 'POST', ddlHolding, JSON.stringify({ FloorId: ddlFloor.val() }));
+                LoadDropDown('/Common/GetShopsByFloorIdForDDL', 'POST', ddlShop, JSON.stringify({ FloorId: ddlFloor.val() }));
+            }
+            ajaxCalling();
+        })
+
+        //ddlHolding.change(function () {
+        //    ajaxCalling();
+        //})
+
+        txtSearchHolding.keyup(function () {
+            if (txtSearchHolding.val() == '')
+            {
+                hdfHoldingId.val("0")
+                ajaxCalling();
+            }
+        })
+
+        // Holding Auto Complete //
+        txtSearchHolding.autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("GetHoldingByFloorId", "Common")',
+                    type:'POST',
+                    dataType: "json",
+                    data: { floorId: TryParseInt(ddlFloor.val(), 0), contextKey: txtSearchHolding.val() },
+                    headers:getToken(),
+                    success: function (data) {
+                        console.log(data);
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.text, id: item.value};
+                        }));
+                    },
+                    error: function (xhr, status, error) {
+                        console.log(error);
+                    }
+                });
+            },
+            select: function (event, ui) {
+                //$("#details").empty();
+                //txtShopName.val(ui.item.value);
+                //ddlShopId.val(ui.item.id);
+                //ddlShopId.trigger("change");
+                var txt = ui.item.value.substring(ui.item.value.indexOf('-') + 1);
+                txtSearchHolding.val(txt);
+                hdfHoldingId.val(TryParseInt(ui.item.id,0));
+                txt = ui.item.value.substring(ui.item.value.indexOf('-') + 1);
+                ui.item.value = txt;
+                ajaxCalling();
+            },
+            messages: {
+                noResults: "failure"
+            },
+            minLength: 0
+        }).focus(function () {
+            $(this).autocomplete("search")
+            });
+        //-------------------------------//
+
+        ddlShop.change(function () {
+            ajaxCalling();
+        })
+
+        dptToDate.change(function () {
+            ajaxCalling()
+        })
+        dptFromDate.change(function () {
+            ajaxCalling()
+        })
+        function ajaxCalling() {
+            var data = { flag: "edit", floorId: TryParseInt(ddlFloor.val(), 0), holdingNo: hdfHoldingId.val(), shopId: TryParseInt(ddlShop.val(), 0), fromDate:dptFromDate.val(),toDate:dptToDate.val() };
+            $.when(getReqWithData(dataType.json, 'GET', '/Organization/GetInvoiceList', data)).then(function (res, status) {
+                if (status == 'success') {
+                    LodaDataTable(res);
+                }
+            }).fail(function (error) {
+                consoleLog(error);
+            })
+        }
+
+        function LodaDataTable(objData) {
+            $("#tblInvoiceList tbody").empty();
+            var dataLength = objData.length;
+            if (objData != null && objData.length > 0) {
+                $.each(objData, function (index, item) {
+                    var td1 = '<td class="text-center">' + (index + 1) + '</td>';
+                    var td2 = '<td class="hide">' + item.Id + "</td>";
+                    var td3 = '<td>' + item.InvoiceNo + '</td>';
+                    var td4 = '<td>' + item.FloorNo + '</td>';
+                    var td5 = '<td>' + item.HoldingNo + '</td>';
+                    var td6 = '<td>' + item.ShopName + '</td>';
+                    var td7 = '<td data-val="' + item.TotalFineAmount + '" align="right" class="font-weight-bold">' + item.TotalFineAmountBN + '</td>';
+                    var td8 = '<td data-val="' + item.TotalConnectionFee + '" align="right" class="font-weight-bold">' + item.TotalConnectionFeeBN + '</td>';
+                    var td9 = '<td data-val="' + item.TotalChargeAmount + '" align="right" class="font-weight-bold">' + item.TotalChargeAmountBN + '</td>';
+                    var td10 = '<td align="center">' + item.EntryUser + '</td>';
+                    var td11 = '<td align="center">' + getDateFromJson(item.EntryDate) + '</td>';
+                      
+                    var td12 = '<td align="center"><a href="#" class="btn btn-success btn-sm data-view-item" data-view-item="' + item.InvoiceNo + '">বিস্তারিত</a><a href="#" class="btn btn-warning btn-sm data-item-report" data-item-report="' + item.InvoiceNo + '">রিপোর্ট</a></td>';
+                    
+                    var tr = '<tr>' + td1 + td2 + td3 + td4 + td5 + td6 + td7 + td8 + td9 + td10 + td11 + td12+'</tr>';
+                    $("#tblInvoiceList tbody").append(tr);
+
+                })
+                tblRowCount.text(dataLength);
+            }
+            else {
+                tblRowCount.text('0');
+                var tr = '<tr class="text-center empty-row"><td colspan="11">কোন ডাটা পাওয়া যায়নি...।</td></tr>';
+                $("#tblInvoiceList tbody").append(tr);
+            }
+        }
+
+        $(document).on('click', 'a.data-view-item', function (e) {
+            e.preventDefault();
+            var invoiceNo = $(this).attr('data-view-item');
+            var data = JSON.stringify({ invoiceNo: invoiceNo });
+            $("#totalChargeAmt").text('০');
+            $("#totalFineAmt").text('০');
+            $("#totalConAmt").text('০');
+            $("#totalAmt").text('০');
+            $("#invNo").text('');
+            $("#invDate").text('');
+            $("#shopName").text('');
+            $("#address").text('');
+            $("#tblInvDeatil tbody").empty();
+            $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Organization/GetInvoiceDetails', data, getToken())).then(function (res, status) {
+                if (status == 'success') {
+                    LoadDetails(res);
+                }
+            }).fail(function (error) {
+                consoleLog(error);
+            })
+        })
+
+        function LoadDetails(objData) {
+            if (objData != null && objData.length > 0) {
+                $.each(objData, function (index, item) {
+                    var td1 = '<td>' + (index + 1) + '</td>';
+                    var td2 = '<td>' + item.MonthAndYear + '</td>';
+                    var td3 = '<td data-val="' + item.ChargeAmount + '">' + item.ChargeAmountBN + '</td>';
+                    var td4 = '<td data-val="' + item.FineAmount + '">' + item.FineAmountBN + '</td>';
+                    var td5 = '<td data-val="' + item.ConnectionFee + '">' + item.ConnectionFeeBN + '</td>';
+                    var td6 = '<td data-val="' + item.NetAmount + '">' + item.NetAmountBN + '</td>';
+                    var tr = "<tr>" + td1 + td2 + td3 + td4 + td5 + td6 + "</tr>";
+                    $("#tblInvDeatil tbody").append(tr);
+                })
+                var totalAmountBN = objData[0].TotalAmountBN;
+                var totalChargeAmountBN = objData[0].TotalChargeAmountBN;
+                var totalConnectionFeeBN = objData[0].TotalConnectionFeeBN;
+                var totalFineAmountBN = objData[0].TotalFineAmountBN;
+                $("#totalChargeAmt").text(totalChargeAmountBN);
+                $("#totalFineAmt").text(totalConnectionFeeBN);
+                $("#totalConAmt").text(totalFineAmountBN);
+                $("#totalAmt").text(totalAmountBN);
+                $("#invNo").text(objData[0].InvoiceNo);
+                $("#invDate").text(objData[0].InvoiceDate);
+                $("#shopName").text(objData[0].ShopName);
+                $("#address").text(objData[0].Address);
+                $("#modalInvoiceDetails").modal("show");
+            }
+        }
+
+        $(document).on('click', '.data-item-report', function (e) {
+            e.preventDefault();
+            var invoiceNo = $(this).attr("data-item-report");
+            if (invoiceNo != '') {
+                var data = JSON.stringify({ invoiceNo: invoiceNo })
+                $.when(postReqWithData(dataType.applicationJson,dataType.json, 'POST', '/Organization/GetInvoiceReport', data)).then(function (res, status) {
+                    if (status == "success") {
+                        var pdfWindow = window.open("", "_blank")
+                        pdfWindow.document.write("<embed width='100%' height='100%' src='" + encodeURI(res.report) + "'></embed>");
+                        download(res.report, ("Invoice-" + invoiceNo), "application/pdf");
+                    }
+                }).fail(function (error) {
+                    consoleLog(error);
+                })
+            }
+        })
+
+        $("#btnReport").click(function (e) {
+            e.preventDefault();
+            var url = "/Organization/GetInvoiceDetailsReport?floorId=" + TryParseInt(ddlFloor.val(), 0) + "&holdingNo=" + TryParseInt(hdfHoldingId.val(), 0) + "&shopId=" + TryParseInt(ddlShop.val(), 0) + "&fromDate=" + dptFromDate.val() + "&toDate=" + dptToDate.val();
+            window.open(url, "_blank");
+        })
+
+    </script>
+}

@@ -1,0 +1,604 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ViewModels.VmShop>
+@{
+    ViewBag.Title = "List of Shop";
+    int sl = 0;
+    string state = string.Empty;
+}
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h4>শপের তালিকা</h4>
+        <hr />
+    </div>
+    <div class="col-md-12">
+        <div class="row">
+            @Html.AntiForgeryToken()
+            <div class="col-md-2">
+                @Html.DropDownList("ddlFloorList", (IEnumerable<SelectListItem>)ViewBag.FloorList, "সিলেক্ট ফ্লোর", new { @class = "form-control" })
+            </div>
+            <div class="col-md-3">
+                <select id="ddlHoldingList" class="form-control">
+                    <option value="">হোল্ডিং সিলেক্ট করুন</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="ddlShopList" class="form-control">
+                    <option value="">শপ সিলেক্ট করুন</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <h3>
+                    <label id="tbl-row-count">0</label>
+                    <span style="font-size:x-small">(Rows)</span>
+                </h3>
+            </div>
+            <div class="col-md-2">
+                <a href="/Organization/CreateShop" class="btn btn-primary float-lg-right" id="btnAddNew"><i class="fa fa-plus"></i> নতুন শপ তৈরি করুন </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12" style="margin-top:5px" id="dataContainer">
+        <table class="table table-bordered table-hover table-sm table-responsive-lg" id="tblFloorData">
+            <thead class="btn-info text-center">
+                <tr>
+                    <th class="hide"></th>
+                    <th>SL No.</th>
+                    <th>দোকানের নাম</th>
+                    <th>মালিকের নাম</th>
+                    <th style="vertical-align:middle">মোবাইল নং</th>
+                    <th class="hide"></th>
+                    <th style="vertical-align:middle">ফ্লোরের নং</th>
+                    <th style="vertical-align:middle">হোল্ডিং নং</th>
+                    <th style="vertical-align:middle">অবস্থা</th>
+                    <th style="vertical-align:middle">এন্ট্রি ইউজার</th>
+                    <th style="vertical-align:middle">অ্যাকশান</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    sl = sl + 1;
+                    if (item.StateStatus == "Active")
+                    {
+                        state = "চালু আছে";
+                    }
+                    else if (item.StateStatus == "Inactive")
+                    {
+                        state = "বন্ধ আছে";
+                    }
+                    <tr>
+                        <td class="hide">@item.ShopId</td>
+                        <td class="text-center" style="width:7%">@sl</td>
+                        <td>@item.ShopName</td>
+                        <td>@item.ProprietorName</td>
+                        <td>@item.MobileNo</td>
+                        <td class="hide">@item.FloorId</td>
+                        <td>@item.FloorName</td>
+                        <td>@item.HoldingNo</td>
+                        <td>@state</td>
+                        <td>@item.EntryUser</td>
+                        <td class="text-center" style="width:25%">
+                            @Ajax.ActionLink("চার্জ সমূহ", "GetChargesByShopId", "Organization", new { shopid = item.ShopId }, new AjaxOptions { InsertionMode = InsertionMode.Replace, UpdateTargetId = "ViewShopCharges", HttpMethod = "POST" }, new { @class = "btn btn-info btn-sm btn-charges", data_toggle = "modal", data_target = "#exampleModalCenter" })
+                            <a href="/Organization/CreateShop?shopid=@item.ShopId&floorid=@item.FloorId" class="btn btn-icon btn-sm btn-warning data-edit-shop" data-edit-item="@item.ShopId" data-floor-item="@item.FloorId"><i class="far fa-edit"></i> এডিট</a>
+                            <a href="/Organization/CreateShop?shopid=@item.ShopId&floorid=@item.FloorId" class="btn btn-icon btn-sm btn-danger data-del-shop" data-del-item="@item.ShopId" data-floor-item="@item.FloorId"><i class="fas fa-times"></i> ডিলেট</a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count() == 0)
+                {
+                    <tr class="text-center">
+                        <td colspan="9">No Data Found..</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalShop" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header alert-success">
+                <h4 id="modalHeading" class="modal-title">নতুন দোকান তৈরি করুন</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="frmFloor">
+                    <input type="hidden" name="Id" id="hdfShopId" />
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="txtShopName" class="control-label font-weight-bold">দোকানের নামঃ</label>
+                            <input type="text" name="ShopName" value="" id="txtShopName" class="form-control" />
+                            <span class="error hide required-shopName">দোকানের নাম আবশ্যক</span>
+                            <span class="error hide duplicate-shopName">এই নামে ইতিমধ্যে দোকান আছে</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="" class="control-label font-weight-bold">মালিকের নামঃ</label>
+                            <input type="text" id="txtProprietorName" name="ProprietorName" value="" class="form-control" />
+                            <span class="error hide required-proprietorName">মালিকের নাম আবশ্যক</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="txtMobileNo" class="control-label font-weight-bold">মোবাইল নম্বরঃ</label>
+                            <input type="text" id="txtMobileNo" name="MobileNo" value="" class="form-control" />
+                            <span class="error hide required-mobileNo">মোবাইল নম্বর আবশ্যক</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="txtEmail" class="control-label font-weight-bold">ই-মেইলঃ</label>
+                            <input type="email" id="txtEmail" name="Email" value="" class="form-control" />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="txtAddress" class="control-label font-weight-bold">বাড়ির ঠিকানাঃ</label>
+                            <textarea type="text" id="txtAddress" name="Address" value="" class="form-control" rows="3" cols="20"></textarea>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="txtRegistrationNo" class="control-label font-weight-bold">রেজিঃ নংঃ</label>
+                            <input type="text" id="txtRegistrationNo" name="RegistrationNo" value="" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="ddlStateStatus" class="control-label font-weight-bold">বর্তমান অবস্থাঃ</label>
+                            <select class="form-control" id="ddlStateStatus">
+                                <option value="">অবস্থা সিলেক্ট করুন</option>
+                                <option value="Active">চালু আছে</option>
+                                <option value="Inactive">বন্ধ আছে</option>
+                            </select>
+                            <span class="error hide required-status">বর্তমান অবস্থা আবশ্যক</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="ddlFloor" class="control-label font-weight-bold">ফ্লোর নংঃ</label>
+                            <select id="ddlFloor" class="form-control">
+                                <option value="">ফ্লোর সিলেক্ট করুন</option>
+                            </select>
+                            <span class="error hide required-floor">ফ্লোর নং আবশ্যক</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="" class="control-label font-weight-bold">হোল্ডিং নং</label>
+                            <input type="text" value="" id="txtHoldingNo" class="form-control" />
+                            <span class="error hide required-holding">অন্তত একটি হোল্ডিং নং আবশ্যক</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6"></div>
+                        <div class="form-group col-md-6">
+                            <span class="error hide duplicate-holding">হোল্ডিংটি ইতিমধ্যে আপনি সংযুক্ত করেছেন।</span>
+                            <br />
+                            <table class="table table-bordered table-sm" id="tblHolding">
+                                <thead class="btn-warning text-center">
+                                    <tr>
+                                        <th class="hide"></th>
+                                        <th>SL</th>
+                                        <th class="hide"></th>
+                                        <th>Holding No</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer btn-light">
+                <div class="col-md-6">
+                    <div id="msg1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে সেভ হয়েছে।
+                    </div>
+                    <div id="msg2" class="alert alert-danger hide float-left">
+                        ডাটা সেভ হতে ব্যর্থ হয়েছে/কোন সম্যসা হয়েছে
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-danger float-right" data-dismiss="modal" data-target="#"><i class="fas fa-times"></i> বাতিল করুন </button>
+                    <button type="submit" class="btn btn-success float-right" id="btnSubmit"><i class="fas fa-save"></i> সেভ করুন </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalDelete" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header btn-warning">
+                <h4 id="modalHeading" class="modal-title">শপ বাতিল করুন</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="modeldelText">আপনি কি নিশ্চিতভাবে <b class="delvalue"></b> মুছে ফেলতে চান?</p>
+            </div>
+            <div class="modal-footer">
+                <div class="col-md-7">
+                    <div id="del1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে ডিলেট হয়েছে।
+                    </div>
+                    <div id="del2" class="alert alert-danger hide float-left">
+                        কোন সম্যসা হয়েছে/ডাটা ডিলেট হয়নি।
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <button type="button" class="btn btn-success float-right" data-dismiss="modal" data-target="#"> না </button>
+                    <button type="submit" class="btn btn-danger float-right" id="btnDelShop"> হ্যাঁ </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLongTitle">শপের চার্জ সমূহ</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="ViewShopCharges">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+
+    <script type="text/javascript">
+        var txtShopName = $("#txtShopName");
+        var txtProprietorName = $("#txtProprietorName");
+        var txtMobileNo = $("#txtMobileNo");
+        var ddlFloor = $("#ddlFloor");
+        var txtEmail = $("#txtEmail");
+        var txtAddress = $("#txtAddress");
+        var txtRegistrationNo = $("#txtRegistrationNo");
+        var ddlStateStatus = $("#ddlStateStatus");
+        var txtHoldingNo = $("#txtHoldingNo");
+        var hdfShopId = $("#hdfShopId");
+
+        var tblRowCount = $("#tbl-row-count");
+
+        // Search Control //
+        var ddlHoldingList = $("#ddlHoldingList");
+        var ddlFloorList = $("#ddlFloorList");
+        var ddlShopList = $("#ddlShopList");
+
+        $(document).ready(function() {
+            LoadDropDown('/Common/GetFloorsForDDL', 'POST', ddlFloor);
+            //LoadDropDown('/Common/GetFloorsForDDL', 'POST', ddlFloorList);
+            fntableRowCount("tblFloorData", "tbl-row-count");
+        })
+
+        function OpenModal() {
+            clearControl();
+            $(".error").addClass("hide");
+            $("#modalShop").modal("show");
+            $("#tblHolding tbody").empty();
+            $("#modalHeading").text("নতুন দোকান তৈরি করুন");
+        }
+
+        function clearControl() {
+            txtShopName.val('');
+            txtProprietorName.val('');
+            txtMobileNo.val('');
+            ddlFloor.val('');
+            txtEmail.val('');
+            txtAddress.val('');
+            txtRegistrationNo.val('');
+            ddlStateStatus.val('');
+            hdfShopId.val('0');
+        }
+
+        $("#btnAddNew").click(function (e) {
+            //e.preventDefault();
+            //OpenModal();
+        });
+
+        ddlFloor.change(function () {
+            $("#tblHolding tbody").empty();
+        })
+
+        var objData = {};
+
+        txtHoldingNo.autocomplete({
+            source: function (request, response) {
+                var id = TryParseInt(ddlFloor.val(), 0);
+                $.ajax({
+                    url: '@Url.Action("GetHoldingNo", "Common")',
+                    type: 'POST',
+                    dataType: dataType.json,
+                    data: { floorId: id, contextKey: txtHoldingNo.val() },
+                    success: function (data) {
+                        objData = {};
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.text, id: item.value };
+                        }))
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Holding no autocomplete error");
+                        console.log(error);
+                    }
+                })
+            },
+            select: function (event,ui) {
+                console.log(ui);
+                if (TryParseInt(ui.item.id,0) > 0)
+                {
+                    objData = {};
+                    objData = ui.item;
+                    dataObjPassingforBind(objData);
+                }
+                txtHoldingNo.val('');
+                ui.item.value = "";
+                ui.item.id = "";
+            },
+            messages: {
+                noResults: "failure"
+            },
+            minLength: 0
+        }).focus(function () {
+            $(this).autocomplete("search")
+            });
+
+        function dataObjPassingforBind(obj) {
+            if (!($.isEmptyObject(obj))) {
+                bindShopHolding(obj);
+            }
+        }
+
+        function bindShopHolding(obj) {
+            $(".duplicate-holding").addClass("hide");
+            if ($("#tblHolding tbody tr").length == 0) {
+                tblBindHolding(obj);
+            }
+            else {
+                var isExist = false;
+                var count = 0;
+                $.each($("#tblHolding tbody tr"), function (index, item) {
+                    var id = $(this).find("td:eq(2)").html();
+                    console.log("Table id");
+                    console.log(item);
+                    if (obj.id == id) {
+                        isExist = true;
+                        return false;
+                    }
+                })
+                if (!isExist) {
+                    tblBindHolding(obj);
+                }
+                else {
+                    $(".duplicate-holding").removeClass("hide");
+                }
+            }
+        }
+
+        function tblBindHolding(obj) {
+            var tbody = $("#tblHolding tbody");
+            var shopid = TryParseInt(obj.label, 0);
+            var rowCount = $("#tblHolding tbody tr").length;
+            var td1 = "<td class='hide'>" + shopid + "</td>";
+            var td2 = "<td class='text-center'>" + (rowCount + 1) + "</td>";
+            var td3 = "<td class='hide'>" + obj.id + "</td>";
+            var td4= "<td>" + obj.value + "</td>";
+            var td5 = "<td><a href='#' class='btn btn-sm btn-danger data-del-item' data-del-item='0'>ডিলেট</a></td>";
+            var tr = "<tr>"+td1 + td2 + td3 + td4+td5+"</tr>";
+            tbody.append(tr);
+            txtHoldingNo.val('');
+        }
+
+        $(document).on("click", "a.data-del-item", function (e) {
+            e.preventDefault();
+            var ind = $(this).parent().parents('tbody tr').index();
+            $("#tblHolding tbody tr").eq(ind).css("background-color", "#ff6347").fadeOut(800,
+                function () {
+                    $("#tblHolding tbody tr").eq(ind).remove();
+                });
+
+            fnFixTheTbodyRowSerial("#tblHolding", ind);
+        })
+
+        function validateForm() {
+            var isValid = true;
+            $(".error").addClass("hide");
+            if ($.trim(txtShopName.val()) == '')
+            {
+                $(".required-shopName").removeClass("hide");
+                isValid = false;
+            }
+            if ($.trim(txtProprietorName.val()) == '')
+            {
+                $(".required-proprietorName").removeClass("hide");
+                isValid = false;
+            }
+            if ($.trim(txtMobileNo.val()) == '') {
+                $(".required-mobileNo").removeClass("hide");
+                isValid = false;
+            }
+            if (ddlFloor.val() == '')
+            {
+                $(".required-floor").removeClass("hide");
+                isValid = false;
+            }
+            if (ddlStateStatus.val() == '') {
+                $(".required-status").removeClass("hide");
+                isValid = false;
+            }
+            if ($("#tblHolding tbody tr").length == 0) {
+                $(".required-holding").removeClass("hide");
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        $("#btnSubmit").click(function (e) {
+            e.preventDefault();
+            if (validateForm() == true)
+            {
+                disable("#btnSubmit");
+                var holding = [];
+                holding.length = 0;
+
+                $.each($("#tblHolding tbody tr"), function (index,item) {
+                    var id = $(this).find("td:eq(0)").html();
+                    var hid = $(this).find("td:eq(2)").html();
+                    var hno = $(this).find("td:eq(3)").html();
+                    holding.push({ ShopId: id, HoldingId: hid, HoldingNo:hno});
+                })
+                var id = hdfShopId.val() == '' ? 0 : TryParseInt(hdfShopId.val(), 0);
+                var data = JSON.stringify({
+                    ShopId: id, ShopName: txtShopName.val(), ProprietorName: txtProprietorName.val(), MobileNo: txtMobileNo.val(),
+                    Email: txtEmail.val(), HomeAddress: txtAddress.val(), RegistrationNo: txtRegistrationNo.val(), StateStatus: ddlStateStatus.val(),
+                    FloorId: ddlFloor.val(), Holdings: holding
+                })
+                console.log("Final Data");
+                console.log(data);
+
+                $.when(postReqWithData(dataType.applicationJson, dataType.json, 'POST', '/Organization/SaveShop', data)).then(function (res, status) {
+                    console.log(res);
+                    console.log(status);
+                    if (res == true)
+                    {
+                        message("#msg1","#modalShop")
+                    }
+                    else {
+                        message("#msg1")
+                    }
+                    enable("#btnSubmit");
+                }).fail(function (error) {
+                    console.log(error);
+                    enable("#btnSubmit");
+                    message("#msg1");
+                })
+            }
+        })
+
+        $(document).on("click", "a.data-edit-shop", function (e) {
+            //e.preventDefault();
+            //var id1 = $(this).attr("data-edit-item");
+            //var id2 = $(this).attr("data-floor-item");
+
+            //var data = JSON.stringify({ shopid: id1, floorId: id2 });
+            //$.when(postReqWithData(dataType.applicationJson, dataType.json, 'POST', '/Organization/GetShopDataForModification', data)).then(function (res, status)
+            //{
+            //    console.log(res);
+            //    console.log(status);
+            //    console.log(res.shop);
+            //    if (res.exec == true)
+            //    {
+            //        OpenModal();
+            //        $("#modalHeading").text("দোকান আপডেট করুন");
+            //        console.log(res.shop.ShopId);
+            //        hdfShopId.val(res.shop.ShopId);
+            //        txtShopName.val(res.shop.ShopName);
+            //        txtProprietorName.val(res.shop.ProprietorName);
+            //        txtMobileNo.val(res.shop.MobileNo);
+            //        txtEmail.val(res.shop.Email);
+            //        txtAddress.val(res.shop.HomeAddress);
+            //        txtRegistrationNo.val(res.shop.RegistrationNo);
+            //        ddlStateStatus.val(res.shop.StateStatus);
+            //        ddlFloor.val(res.shop.FloorId);
+
+            //        var dataObj = [];
+            //        dataObj.length = 0;
+            //        $.each(res.shopHoldings, function (index,item) {
+            //            dataObj.push({ label: item.ShopId, value: item.HoldingNo, id: item.HoldingId });
+            //        })
+
+            //        console.log('Holding data');
+            //        console.log(dataObj);
+
+            //        $.each(dataObj, function (index,item) {
+            //            tblBindHolding(item);
+            //        })
+            //    }
+            //    else {
+            //        alert(execuStatus.fail);
+            //    }
+
+            //}).fail(function (error) {
+            //    console.log(error);
+            //})
+        })
+
+        $(document).on("click", "a.data-del-shop", function (e) {
+            e.preventDefault();
+            var id = $(this).attr("data-del-item");
+            clearControl();
+            var shopName = $(this).parent().parents('tr').find("td:eq(2)").html();
+            $("#modalDelete .modal-body p.modeldelText b.delvalue").text('');
+            $("#modalDelete .modal-body p.modeldelText b.delvalue").text(shopName);
+            $("#modalDelete").modal('show');
+            hdfShopId.val(id);
+        })
+
+        $("#btnDelShop").click(function (e) {
+            e.preventDefault();
+            var id = TryParseInt(hdfShopId.val(), 0);
+            disable("#btnDelShop");
+            $.when(postReqWithData(dataType.applicationJson, dataType.json, 'POST', '/Organization/DeleteShop', JSON.stringify({ shopId: id }))).then(function (res, status) {
+                console.log(res);
+                console.log(status);
+                if (res == true) {
+                    message("#del1", "#modalDelete");
+                } else {
+                    message("#del2");
+                }
+                enable("#btnDelShop");
+            }).fail(function (error) {
+                console.log(error);
+                enable("#btnDelShop");
+            })
+        })
+
+        //$(document).on("click", "a.btn-charges", function (e) {
+        //    e.preventDefault();
+        //})
+
+        // ------------Search Implementation------------ //
+        ddlFloorList.change(function () {
+            clearDropdown("ddlHoldingList");
+            clearDropdown("ddlShopList")
+            if (TryParseInt(ddlFloorList.val(), 0) > 0)
+            {
+                LoadDropDown('/Common/GetHoldingByFloorId', 'POST', ddlHoldingList, JSON.stringify({ floorId: ddlFloorList.val(), contextKey: "" }));
+                LoadDropDown('/Common/GetShopListByFloorOrHoldingOrBoth', 'POST', ddlShopList, JSON.stringify({ floorId: ddlFloorList.val(), holdingId: 0 }));
+            }
+            LoadSearchableData();
+        })
+
+        ddlHoldingList.change(function () {
+            clearDropdown("ddlShopList")
+            if (TryParseInt(ddlHoldingList.val(), 0) > 0) {
+                LoadDropDown('/Common/GetShopListByFloorOrHoldingOrBoth', 'POST', ddlShopList, JSON.stringify({ floorId: ddlFloorList.val(), holdingId: TryParseInt(ddlHoldingList.val(),0)}));
+            }
+            LoadSearchableData();
+        })
+
+        ddlShopList.change(function () {
+            LoadSearchableData();
+        })
+
+        function LoadSearchableData()
+        {
+            var floor = TryParseInt(ddlFloorList.val(),0);
+            var holding = TryParseInt(ddlHoldingList.val(),0);
+            var shop = TryParseInt(ddlShopList.val(),0);
+            //int floorId, int holdingId, long shopId
+            var data = JSON.stringify({ floorId: floor, holdingId: holding, shopId: shop });
+            tblRowCount.text('0');
+            $.when(postReqWithToken(dataType.applicationJson, 'html', 'POST', '/Organization/GetShopsBySearch', data, getToken())).then(function (res, status)
+            {
+                $("#dataContainer").empty();
+                if (status == "success")
+                {
+                    $("#dataContainer").append(res);
+                    fntableRowCount("tblFloorData", "tbl-row-count");
+                }
+            }).fail(function (error) {
+                console.log(error);
+            })
+        }
+    </script>
+}

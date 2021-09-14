@@ -1,0 +1,77 @@
+﻿@model RevenueAndExpense.BO.ViewModels.VmLogIn
+@{ 
+
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Shoping Mall Revenue & Expense Management System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--===============================================================================================-->
+    <link rel="icon" type="image/png" href="~/favicon.ico" />
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="~/Content/FormStyle/bootstrap.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="~/Content/FormStyle/font-awesome.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="~/Content/FormStyle/icon-font.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="~/Content/FormStyle/animate.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="~/Content/FormStyle/util.css">
+    <link rel="stylesheet" type="text/css" href="~/Content/FormStyle/main.css">
+    <!--===============================================================================================-->
+    <style>
+        body {
+            background-image:url('/Images/bg.jpg');
+            background-size:cover;
+        }
+    </style>
+</head>
+@*style="background-color:rgba(43, 43, 43, 0.75)"*@
+<body>
+    <div class="limiter">
+        <div class="container-login100">
+            <div class="wrap-login100 p-t-50 p-b-90">
+                <form class="login100-form validate-form flex-sb flex-w" action="/Account/LogIn" method="post">
+                    <span class="login100-form-title p-b-51">
+                        Login
+                    </span>
+                    <div class="wrap-input100 validate-input m-b-16" data-validate="Username is required">
+                        <input class="input100" type="text" name="UserName" placeholder="Username">
+                        <span class="focus-input100"></span>
+                    </div>
+                    <div class="wrap-input100 validate-input m-b-16" data-validate="Password is required">
+                        <input class="input100" type="password" name="Password" placeholder="Password">
+                        <span class="focus-input100"></span>
+                    </div>
+                    <div>
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="container-login100-form-btn m-t-17">
+                        <button class="login100-form-btn">
+                            Login
+                        </button>
+                    </div>
+                    <div class="text-center" >
+                        <br />
+                        <p style="color:#fff">Copyright &copy; 2019-@DateTime.Now.Year | Powered By <a style="text-decoration:none;color:darkkhaki" href="http://playon24.com.bd/" target="_blank">PlayOn24</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--===============================================================================================-->
+    <script src="~/Content/assets/modules/jquery.min.js"></script>
+    <!--===============================================================================================-->
+    <script src="~/Content/FormStyle/animsition.min.js"></script>
+    <!--===============================================================================================-->
+    <script src="~/Content/assets/modules/popper.js"></script>
+    <script src="~/Content/FormStyle/bootstrap.min.js"></script>
+    <!--===============================================================================================-->
+    <script src="~/Content/FormStyle/main.js"></script>
+</body>
+</html>

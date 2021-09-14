@@ -1,0 +1,101 @@
+﻿@model IEnumerable<Mainmenu>
+@{
+    ViewBag.Title = "Set User Menu";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        @Html.AntiForgeryToken()
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label class="control-label font-weight-bold" for="ddlUserList">User Name:</label>
+                @Html.DropDownList("ddlUserList", (IEnumerable<SelectListItem>)ViewBag.UserList, "Select User Name", new { @class = "form-control" })
+            </div>
+            <div class="form-group col-md-4"></div>
+            <div class="form-group col-md-4">
+                <label class="" for="control-label font-weight-bold" style="visibility:hidden">Save Data</label>
+                <div>
+                    <button class="btn btn-icon btn-success" id="btnSubmit"> Save </button>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        @foreach (var item in Model)
+        {
+            <div class="row">
+                <div class="col-md-12 alert alert-light text-center">
+                    <b>@item.MenuName</b>
+                </div>
+                <div class="col-md-12">
+                    <div class="row">
+                        @foreach (var item2 in item.Submenus)
+                        {
+                            <div class="col-md-3" style="word-wrap:break-word;margin-bottom:5px">
+                                <div class="form-control form-control-sm btn-info form-inline" style="font-size:x-small">
+                                    <input type="checkbox" id="@item2.SubmenuId" data-sub-id="@item2.SubmenuId" name="submenuItem"  data-mainmenu-id="@item.MenuId"/>
+                                    <label><b> @item2.SubmenuName</b></label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="col-md-12"></div>
+</div>
+
+
+@section scripts{
+    <script type="text/javascript">
+        var ddlUserList = $("#ddlUserList");
+
+        ddlUserList.change(function () {
+            $("input[type='checkbox'][name='submenuItem']").prop("checked", false);
+
+            $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Admin/GetUserAuth', JSON.stringify({ userId: ddlUserList.val() }), getToken()).then(function (data, status) {
+                $("input[type='checkbox'][name='submenuItem']").prop("checked", false);
+                $.each(data, function (index, item) {
+                    $("input[type='checkbox'][name='submenuItem'][data-sub-id='" + item.SubmenuId + "']").prop("checked", true);
+                })
+
+            }).fail(function (err) {
+                console.log(err);
+            }));
+        })
+
+
+
+        $("#btnSubmit").click(function (e) {
+            e.preventDefault();
+            var allCheckboxItem = $("input[type='checkbox'][name='submenuItem']");
+            var menuData = [];
+            menuData.length = 0;
+            $.each(allCheckboxItem, function (index, item) {
+                if ($("input[type='checkbox'][name='submenuItem'][data-sub-id='" + item.getAttribute("data-sub-id") + "']").is(":checked")) {
+                    menuData.push({ SubmenuId: item.getAttribute("data-sub-id"), MainmenuId: item.getAttribute("data-mainmenu-id") })
+                }
+            })
+
+            var data = { UserId: ddlUserList.val(), MenuData: menuData }
+
+            data = JSON.stringify(data);
+            console.log(data);
+
+            if (TryParseInt(ddlUserList.val(), 0) > 0 && menuData.length > 0)
+            {
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Admin/SaveUserAuthorization', data, getToken())).then(function (res, status) {
+                    console.log(status);
+                    console.log(res);
+                    if (status = "success") {
+                        alert(execuStatus.successSave)
+                    }
+                }).fail(function (err) {
+                    console.log(err);
+                })
+            }
+        })
+    </script>
+}

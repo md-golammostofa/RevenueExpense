@@ -1,0 +1,268 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ViewModels.VmSubmenu>
+
+@{
+    ViewBag.Title = "List of Submenu";
+    int count = 0;
+}
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h4> List of Submenu </h4>
+    </div>
+    <div class="col-md-12">
+        <div class="form-row">
+            <div class="col-md-4">
+                <input type="text" class="form-control" placeholder="Search By Anything" id="searchBy" onkeyup="fnSearchByAnything(this,'tblSubmenuList')" />
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <button class="btn btn-icon btn-primary float-right" id="btnAddNew" onclick="OpenModal()"><i class="fas fa-plus"></i> Create New Submenu </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <table class="table table-bordered table-sm table-responsive-lg" id="tblSubmenuList">
+            <thead class="btn-info">
+                <tr class="text-center">
+                    <th>SL</th>
+                    <th class="hide">
+                        SubMenuId
+                    </th>
+                    <th>
+                        SubMenu Name
+                    </th>
+                    <th class="hide">
+                        Mainmenu Id
+                    </th>
+                    <th>
+                        Mainmenu Name
+                    </th>
+                    <th>
+                        Controller
+                    </th>
+                    <th>
+                        Action
+                    </th>
+                    <th>
+                        IsViewable
+                    </th>
+                    <th>
+                        Entry User
+                    </th>
+                    <th>
+                        Entry Date
+                    </th>
+
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    count = count + 1;
+                    <tr>
+                        <td class="text-center">@count</td>
+                        <td class="hide">
+                            @Html.DisplayFor(modelItem => item.SubmenuId)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.SubmenuName)
+                        </td>
+                        <td class="hide">
+                            @Html.DisplayFor(modelItem => item.MenuId)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.MenuName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ControllerName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ActionName)
+                        </td>
+                        <td>
+                            @item.IsViewable
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.EntryUser)
+                        </td>
+                        <td>
+                            @item.EntryDate.Value.ToString("dd-MMM-yyyy")
+                        </td>
+                        <td>
+                            <a class="btn btn-warning btn-sm btn-icon data-edit-item" data-edit-item="@item.SubmenuId"><i class="far fa-edit"></i> Edit </a>
+
+                            <a class="btn btn-danger btn-sm btn-icon data-del-item" data-del-item="@item.SubmenuId"><i>&#10006;</i> Delete </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalSubmenu" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header alert-success">
+                <h4 id="modalHeading" class="modal-title">Add New Mainmenu</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="frmMainmenu">
+                    <input type="hidden" name="Id" id="hdfSubmenuId" />
+                    @Html.AntiForgeryToken()
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="txtSubmenu" class="control-label font-weight-bold">Submenu Name:</label>
+                            <input type="text" value="" id="txtSubmenu" class="form-control" />
+                            <span class="error hide required-submenu">Submenu name is required.</span>
+                            <span class="error hide duplicate-submenu">This Submenu is already exist</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="ddlMainMenu" class="control-label font-weight-bold">
+                                Mainmenu Name:
+                            </label>
+                            @Html.DropDownList("ddlMainMenu", (IEnumerable<SelectListItem>)ViewBag.ddlMainMenu, "Select Mainmenu", new { @class = "form-control" })
+                            <span class="error hide required-mainmenu">Mainmenu is required.</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="txtController" class="control-label font-weight-bold">Controller Name:</label>
+                            <input type="text" value="" id="txtController" class="form-control" />
+                            <span class="error hide required-controller">controller is required.</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="txtAction" class="control-label font-weight-bold">Action Name:</label>
+                            <input type="text" value="" id="txtAction" class="form-control" />
+                            <span class="error hide required-action">Action Name is required.</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="ChkIsViewable" class="control-label font-weight-bold" style="visibility:hidden">IsViewable?</label>
+                            <div class="form-control">
+                                <input type="checkbox" id="ChkIsViewable"/> Is Viewable? 
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer btn-light">
+                <div class="col-md-4">
+                    <div id="msg1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে সেভ হয়েছে।
+                    </div>
+                    <div id="msg2" class="alert alert-danger hide float-left">
+                        ডাটা সেভ হতে ব্যর্থ হয়েছে।
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-danger float-right" data-dismiss="modal" data-target="#"><i class="fas fa-times"></i> Cancel </button>
+                <button type="submit" class="btn btn-success float-right" id="btnSubmit"><i class="fas fa-save"></i> Save </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        var hdfSubmenuId = $("#hdfSubmenuId");
+        var txtSubmenu = $("#txtSubmenu");
+        var ddlMainMenu = $("#ddlMainMenu");
+        var txtController = $("#txtController");
+        var txtAction = $("#txtAction");
+        var ChkIsViewable = $("#ChkIsViewable");
+
+        function clearControl() {
+            hdfSubmenuId.val('0');
+            txtSubmenu.val();
+            ddlMainMenu.val('');
+            txtController.val();
+            txtAction.val('');
+            ChkIsViewable.prop("checked", false);
+        }
+
+        function OpenModal() {
+            $("#modalSubmenu").modal("show");
+            clearControl();
+            fnModalHeadChange("Add New Submenu");
+            $(".error").addClass("hide");
+        }
+
+        function validate()
+        {
+            var isValid = true;
+            $(".error").addClass("hide");
+            if (txtSubmenu.val().trim() == '')
+            {
+                isValid = false;
+                $(".required-submenu").removeClass("hide");
+            }
+            if (ddlMainMenu.val() == '')
+            {
+                isValid = false;
+                $(".required-mainmenu").removeClass("hide");
+            }
+            if (txtController.val().trim() == '')
+            {
+                isValid = false;
+                $(".required-controller").removeClass("hide");
+            }
+            if (txtAction.val().trim() == '') {
+                isValid = false;
+                $(".required-action").removeClass("hide");
+            }
+            return isValid;
+        }
+
+        $("#btnSubmit").click(function (e) {
+            e.preventDefault();
+            if (validate() == true)
+            {
+                disable("#btnSubmit");
+                var data = JSON.stringify({ SubmenuId: TryParseInt(hdfSubmenuId.val(), 0), MenuId: ddlMainMenu.val(), SubmenuName: txtSubmenu.val(), ControllerName: txtController.val(), ActionName: txtAction.val(), IsViewable: ChkIsViewable.is(":checked") });
+
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Admin/SaveSubmenu', data, getToken())).then(function (res, status)
+                {
+                    if (res == true) {
+                        message("#msg1", "#modalSubmenu");
+                    }
+                    else {
+                        message("#msg2");
+                    }
+                }).fail(function (error) {
+                    console.log(error);
+                    alert(execuStatus.fail);
+                    })
+                enable("#btnSubmit");
+            }
+        })
+
+        $(document).on('click', 'a.data-edit-item', function (e) {
+            e.preventDefault();
+
+            var id = $(this).attr("data-edit-item");
+            var submenu = $(this).parent().parents('tr').find('td:eq(2)').html().trim();
+            var mainmenu = $(this).parent().parents('tr').find('td:eq(3)').html().trim();
+            var ctrl = $(this).parent().parents('tr').find('td:eq(5)').html().trim();
+            var action = $(this).parent().parents('tr').find('td:eq(6)').html().trim();
+            var isViewable = false;
+            //alert($(this).parent().parents('tr').find('td:eq(7)').html().trim());
+            if ($(this).parent().parents('tr').find('td:eq(7)').html().trim() == 'True') {
+                isViewable = true;
+            }
+
+            OpenModal();
+            fnModalHeadChange("Update Submenu");
+            hdfSubmenuId.val(id);
+            txtSubmenu.val(submenu);
+            ddlMainMenu.val(mainmenu);
+            txtController.val(ctrl);
+            txtAction.val(action);
+            ChkIsViewable.prop("checked", isViewable);
+        })
+    </script>    
+}
+

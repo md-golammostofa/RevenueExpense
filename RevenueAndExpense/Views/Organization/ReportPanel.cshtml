@@ -1,0 +1,114 @@
+﻿@{
+    ViewBag.Title = "Report Panel";
+}
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h4>রিপোর্ট প্যানেল</h4>
+        <hr />
+    </div>
+    <div class="col-md-12">
+        <div class="form-row">
+            <div class="form-group col-md-3">
+                <label class="control-label font-weight-bold">ফান্ড</label>
+                @Html.DropDownList("ddlFundInfo", (IEnumerable<SelectListItem>)ViewBag.ddlFundInfo, "ফান্ড সিলেক্ট করুন", new { @class = "form-control" })
+            </div>
+            <div class="form-group col-md-2">
+                <label class="control-label font-weight-bold">তারিখ হইতেঃ</label>
+                <input type="date" class="form-control" id="dptFromDate" />
+            </div>
+            <div class="form-group col-md-2">
+                <label class="control-label font-weight-bold">তারিখ পর্যন্তঃ</label>
+                <input type="date" class="form-control" id="dptToDate" />
+            </div>
+            <div class="form-group col-md-1">
+                <label style="visibility:hidden">Rows Count</label>
+                <div>
+                    <h3>
+                        <label id="tbl-row-count">0</label>
+                        <span style="font-size:x-small">(Rows)</span>
+                    </h3>
+                </div>
+            </div>
+            <div class="form-group col-md-3">
+                <label class="control-label font-weight-bold" style="visibility:hidden">Report Button</label>
+                <div>
+                    <button class="btn btn-icon btn-primary" id="btnShow"><i class="fas fa-download fa-sm"></i> রিপোর্ট দেখুন </button>
+                    <button class="btn btn-icon btn-primary" id="btnReport"><i class="fas fa-download fa-sm"></i> ডাউনলোড </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12" id="dataContainer">
+        @{Html.RenderAction("GetReportShow", "Organization");}
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        var ddlFundInfo = $("#ddlFundInfo");
+        var dptFromDate = $("#dptFromDate");
+        var dptToDate = $("#dptToDate");
+        var tblRowCount = $("#tbl-row-count");
+
+        function validate() {
+            var isValid = true;
+            if (ddlFundInfo.val() == '' || TryParseInt(ddlFundInfo.val(), 0) <= 0) {
+                alert("প্লিজ ফান্ড সিলেক্ট করুন");
+                isValid = false;
+                return isValid;
+            }
+            if (dptFromDate.val() == "") {
+                alert("প্লিজ তারিখ হইতে সিলেক্ট করুন");
+                isValid = false;
+                return isValid;
+            }
+            if (dptToDate.val() == "") {
+                alert("প্লিজ তারিখ পর্যন্ত সিলেক্ট করুন");
+                isValid = false;
+                return isValid;
+            }
+            return isValid;
+        }
+
+        $("#btnShow").click(function (e) {
+            e.preventDefault();
+            if (validate() == true) {
+                tblRowCount.text('0');
+                var data = { fundInfoId: ddlFundInfo.val(), fromDate: dptFromDate.val(), toDate: dptToDate.val() };
+                $.when(getReqWithData('html', 'GET', '/Organization/GetReportShow', data)).then(function (res, status) {
+                    console.log(res);
+                    console.log(status);
+                    $("#dataContainer").empty();
+                    $("#dataContainer").append(res);
+                    fntableRowCount("tblReportData", "tbl-row-count");
+                }).fail(function (error) {
+                    alert(execuStatus.fail);
+                    console.log(error);
+                })
+            }
+        })
+
+        $("#btnReport").click(function (e) {
+            e.preventDefault();
+            if (validate() == true) {
+                var data = JSON.stringify({ fundInfoId: ddlFundInfo.val(), fromDate: dptFromDate.val(), toDate: dptToDate.val() });
+                $.when(postReqWithData(dataType.applicationJson,dataType.json, 'POST', '/Organization/RevenueExpenseReport1', data)).then(function (res,status) {
+                    console.log(res);
+                    console.log(status);
+                    //$("#dataContainer").empty();
+                    //$("#dataContainer").append(res);
+                    if (res.isSuccess == true) {
+                        var pdfWindow = window.open("", "_blank")
+                        pdfWindow.document.write("<embed width='100%' height='100%' src='" + encodeURI(res.report) + "'></embed>");
+                        download(res.report, "RevenueExpense", "application/pdf");
+                    }
+                }).fail(function (error) {
+                    alert(execuStatus.fail);
+                    console.log(error);
+                })
+            }
+        })
+    </script>
+}
+
+

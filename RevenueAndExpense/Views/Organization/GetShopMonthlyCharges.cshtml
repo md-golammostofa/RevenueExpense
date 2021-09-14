@@ -1,0 +1,109 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ViewModels.VmShopMonthlyBill>
+@{
+    ViewBag.Title = "List of Shop Monthly Charges";
+    Layout = null;
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-bordered table-hover table-sm table-responsive-lg" id="tblShopChargesData">
+            <thead class="btn-info text-center">
+                <tr>
+                    <th class="hide">Shop Id</th>
+                    <th class="hide">Month</th>
+                    <th class="hide">Year</th>
+                    <th class="hide">FloorId</th>
+                    <th  style="vertical-align:middle">ফ্লোর</th>
+                    <th  style="vertical-align:middle">হোল্ডিং</th>
+                    <th  style="vertical-align:middle">শপের নাম</th>
+                    <th  style="vertical-align:middle">মোবাইল নং</th>
+                    <th  style="vertical-align:middle">বাড়ির ঠিকানা</th>
+                    <th  style="vertical-align:middle">ইমেইল</th>
+                    <th class="hide">Amount</th>
+                    <th  style="vertical-align:middle">মাস এবং সাল</th>
+                    <th  style="vertical-align:middle">বিলের অবস্থা</th>
+                    <th class="hide">StateStatus</th>
+                    <th  style="vertical-align:middle">টাকার পরিমান</th>
+                    <th  style="vertical-align:middle">অ্যাকশান</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="hide">@item.ShopId</td>
+                        <td class="hide">@item.Month</td>
+                        <td class="hide">@item.Year</td>
+                        <td class="hide">@item.FloorId</td>
+                        <td>@item.FloorNo</td>
+                        <td>@item.Holding</td>
+                        <td>@item.ShopName</td>
+                        <td>@item.MobileNo</td>
+                        <td>@item.HomeAddress</td>
+                        <td>@item.Email</td>
+                        <td class="hide">@item.Amount</td>
+                        <td class="text-center">@item.MonthAndYearBN</td>
+                        <td>@item.StateStatusBN</td>
+                        <td class="hide">@item.StateStatus</td>
+                        <td align="right">@item.AmountBN</td>
+                        <td>
+                            @Ajax.ActionLink("চার্জ সমূহ", "GetShopBillDetails", "Organization", new { shopid = item.ShopId, month = item.Month, year = item.Year }, new AjaxOptions { InsertionMode = InsertionMode.Replace, UpdateTargetId = "ViewMonthlyCharges", HttpMethod = "POST" }, new { @class = "btn btn-primary btn-sm btn-charges data-item-charges", data_toggle = "modal", data_target = "#exampleModalCenter" })
+
+                            @if (item.StateStatus == "Pending")
+                            {
+                                <a href="#" class="btn btn-warning btn-sm data-item-report"><i class="fa fa-download"></i> রিপোর্ট </a>
+                                if (User.UserName == "sabbir")
+                                {
+                                    <a href="#" class="btn btn-danger btn-sm data-item-del"> ডিলেট </a>
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count() == 0) {
+                    <tr class="text-center empty-row">
+                        <th colspan="15">কোন ডাটা পাওয়া যায়নি...</th>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLongTitle">মাসিক চার্জ সমূহ</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" value="0" id="hdfShopId" />
+                <input type="hidden" value="0" id="hdfMonth" />
+                <input type="hidden" value="0" id="hdfYear" />
+                <div id="ViewMonthlyCharges">
+
+                </div>
+            </div>
+            <div class="modal-footer btn-light hide">
+                <div class="col-md-4">
+                    <div id="msg1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে সেভ হয়েছে।
+                    </div>
+                    <div id="msg2" class="alert alert-danger hide float-left">
+                        ডাটা সেভ হতে ব্যর্থ হয়েছে।
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success float-right hide" id="btnSubmitPending"><i class="fas fa-save"></i> সেভ করুন </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+

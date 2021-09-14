@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <title>@ViewBag.Title</title>
+    <!-- General CSS Files -->
+    <link rel="stylesheet" href="~/Content/assets/modules/bootstrap/css/bootstrap.min.css">
+    <link href="~/Content/jquery-ui.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/Content/assets/modules/fontawesome/css/all.min.css">
+    <!-- CSS Libraries -->
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="~/Content/assets/css/style.css">
+    <link rel="stylesheet" href="~/Content/assets/css/components.css">
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    <!-- /END GA -->
+
+</head>
+<body class="bg" style="background-image:url('../../Images/bgPatterntiles.png');background-repeat:repeat">
+    <div id="app">
+        <div class="main-wrapper main-wrapper-1" style="background:rgba(255, 255, 255, 0.83);min-height:100%">
+            <div class="navbar-bg"></div>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <nav class="navbar navbar-expand-lg main-navbar">
+                    <ul class="navbar-nav mr-auto mr-3">
+                        <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
+                        <li><a href="#" data-toggle="search" class="nav-link nav-link-lg d-sm-none"><i class="fas fa-search"></i></a></li>
+                    </ul>
+                    <ul class="navbar-nav navbar-right">
+                        <li class="dropdown">
+                            <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
+                                <div class="d-sm-none d-lg-inline-block">@User.FirstName</div>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                @*<a href="features-profile.html" class="dropdown-item has-icon">
+                                    <i class="far fa-user"></i> Profile
+                                </a>
+                                <a href="features-activities.html" class="dropdown-item has-icon">
+                                    <i class="fas fa-bolt"></i> Activities
+                                </a>
+                                <a href="features-settings.html" class="dropdown-item has-icon">
+                                    <i class="fas fa-cog"></i> Settings
+                                </a>
+                                <div class="dropdown-divider"></div>*@
+                                <a href="/Account/LogOut" class="dropdown-item has-icon text-danger">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+
+                //{ Html.RenderAction("Topnavbar", "Common"); }
+                { Html.RenderAction("SideNavBar", "Common"); }
+            }
+            <!-- Main Content -->
+            <br />
+            <div class="main-content">
+                <section class="section">
+                    @RenderBody()
+                </section>
+            </div>
+            <footer class="main-footer" style="background: rgba(10, 4, 4, 0.7);">
+                <div class="footer-left">
+                    Copyright &copy; 2019-@DateTime.Now.Year <div class="bullet"></div> Powered By <a href="http://playon24.com.bd/" target="_blank">PlayOn24</a>
+                </div>
+                <div class="footer-right">
+                    Hot Line 01632 54 93 23 (10am-5pm)
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- General JS Scripts -->
+    <script src="~/Content/assets/modules/jquery.min.js"></script>
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+    <script src="~/Scripts/jquery-ui.js"></script>
+
+    <script src="~/Content/assets/modules/popper.js"></script>
+    <script src="~/Content/assets/modules/bootstrap/js/bootstrap.min.js"></script>
+    <script src="~/Content/assets/modules/nicescroll/jquery.nicescroll.min.js"></script>
+    <!-- Template JS File -->
+    <script src="~/Content/assets/js/scripts.js"></script>
+    <script src="~/Content/assets/js/custom.js"></script>
+
+    <script src="~/Scripts/site.js"></script>
+    <script src="~/Scripts/download.js"></script>
+
+    @RenderSection("scripts", false)
+</body>
+</html>

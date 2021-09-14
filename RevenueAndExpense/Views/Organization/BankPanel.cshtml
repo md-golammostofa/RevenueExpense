@@ -1,0 +1,748 @@
+﻿
+@{
+    ViewBag.Title = "Bank Panel Site";
+}
+
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h4>ব্যাংক প্যানেল</h4>
+        <hr />
+    </div>
+    <div class="col-md-12">
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link bankLink active" id="nav-CashSendReceiveList" data-toggle="tab" href="#CashSendReceiveList" role="tab" aria-controls="CashSendReceiveList" aria-selected="false">টাকা জমা/উত্তোলনের তালিকা</a>
+                <a class="nav-item nav-link bankLink" id="nav-CashSendReceiveEntry" data-toggle="tab" href="#CashSendReceiveEntry" role="tab" aria-controls="CashSendReceiveEntry" aria-selected="false">টাকা জমা/উত্তোলন এন্ট্রি</a>
+                <a class="nav-item nav-link bankLink" id="nav-BankList" data-toggle="tab" href="#BankList" role="tab" aria-controls="BankList" aria-selected="true">ব্যাংকের তালিকা</a>
+                <a class="nav-item nav-link bankLink" id="nav-BankEntry" data-toggle="tab" href="#BankEntry" role="tab" aria-controls="BankEntry" aria-selected="false">ব্যাংক এন্ট্রি</a>
+                <a class="nav-item nav-link bankLink" id="nav-BankFundOpeningList" data-toggle="tab" href="#BankFundOpeningList" role="tab" aria-controls="BankFundOpeningList" aria-selected="false">ফান্ড ব্যাংক জের</a>
+            </div>
+        </nav>
+    </div>
+    <div class="col-md-12">
+        <div class="tab-content" id="nav-tabContent">
+            @Html.AntiForgeryToken()
+            <div class="tab-pane fade show active" id="CashSendReceiveList" role="tabpanel" aria-labelledby="nav-CashSendReceiveList">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-row">
+                            <div class="form-group col-md-3">
+                                <select id="ddlBankSearch" class="form-control search-ctrl-change">
+                                    <option value="">সার্চ ব্যাংক</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <select id="ddlFundSearch" class="form-control search-ctrl-change">
+                                    <option value="">সার্চ ফান্ড</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <select id="ddlStatementSearch" class="form-control search-ctrl-change">
+                                    <option value="">সার্চ স্টেটমেন্ট</option>
+                                    <option value="1">ব্যাংক জমা</option>
+                                    <option value="2">ব্যাংক উত্তোলন</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-1">
+                                <div>
+                                    <h3>
+                                        <label id="tbl-row-count">0</label>
+                                        <span style="font-size:x-small">(Rows)</span>
+                                    </h3>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <input type="number" class="form-control search-ctrl-keyup" id="txtAmountSearch" placeholder="টাকার পরিমাণ" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-row">
+                            <div class="form-group col-md-12" id="BankCashListContainer">
+                                @{Html.RenderAction("GetCashBankTransferList", "Organization");}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="CashSendReceiveEntry" role="tabpanel" aria-labelledby="nav-CashSendReceiveEntry">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form action="">
+                            @Html.Hidden("hdfBankCashId", 0)
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label class="control-label font-weight-bold" for="ddlBankWithAcc">ব্যাংক একাউন্ট</label>
+                                    <select class="form-control" id="ddlBankWithAcc">
+                                        <option value="">ব্যাংক একাউন্ট সিলেক্ট করুন</option>
+                                    </select>
+                                    <span class="error hide bankcash-bank">ব্যাংক একাউন্ট আবশ্যক</span>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label class="control-label font-weight-bold" for="txtAmount">টাকার পরিমাণ <span id="fundBalance"></span></label>
+                                    <input type="number" id="txtAmount" class="form-control" />
+                                    <span class="error hide bankcash-amount">টাকার পরিমাণ আবশ্যক</span>
+                                    <span class="error hide bankcash-limitcross">ব্যাংক ব্যালেন্স কম/আর অবশিষ্ট নেই</span>
+                                    <span class="error hide cashbalance-limitcross">ক্যাশ ব্যালেন্স <span id="cashBalnc"></span></span>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label class="control-label font-weight-bold" for="ddlFundInfo">ফান্ড</label>
+                                    <select class="form-control" id="ddlFundInfo">
+                                        <option value="">ফান্ড সিলেক্ট করুন</option>
+                                    </select>
+                                    <span class="error hide bankcash-fund">ফান্ড আবশ্যক</span>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label class="control-label font-weight-bold" for="ddlBankStatement">স্টেটমেন্ট</label>
+                                    <select class="form-control" id="ddlBankStatement">
+                                        <option value="">স্টেটমেন্ট সিলেক্ট করুন</option>
+                                        <option value="1">ব্যাংক জমা</option>
+                                        <option value="2">ব্যাংক উত্তোলন</option>
+                                    </select>
+                                    <span class="error hide bankcash-statement">স্টেটমেন্ট আবশ্যক</span>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label class="control-label font-weight-bold" for="txtRemark">মন্ত্যব</label>
+                                    <input type="number" id="txtRemark" class="form-control" />
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="txtChequeNo" class="control-label font-weight-bold">চেক নম্বর</label>
+                                    <input type="number" class="form-control" id="txtChequeNo" />
+                                    <span class="error hide bankcash-chequeNo">ব্যাংক উত্তোলনের সময় চেক নম্বর আবশ্যক</span>
+                                    <span class="error hide bankcash-duplicateChequeNo">চেক নম্বরটি ইতিমধ্যে ব্যবহার হয়েছে</span>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label for="dptBankDate" class="control-label font-weight-bold">ব্যাংক তারিখঃ</label>
+                                    <input type="date" id="dptBankDate" class="form-control" />
+                                    <span class="error hide bankcash-bankDate">ব্যাংক তারিখ আবশ্যক</span>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label class="control-label font-weight-bold" style="visibility:hidden">BankCash Submit</label>
+                                    <div>
+                                        <button type="button" class="btn btn-icon btn-success" id="btnBankCashSubmit">সেভ করুন</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="BankList" role="tabpanel" aria-labelledby="nav-BankList">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <input type="text" name="search2" id="searchBy2" class="form-control form-control-sm" placeholder="যেকোন কিছু দিয়ে সার্চ করুন" onkeyup="tableFilter('#tblBankList tbody tr',this)" />
+                            </div>
+                            <div class="form-group col-md-4"></div>
+                            <div class="form-group col-md-4"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-row">
+                            <div class="form-group col-md-12" id="BankListContainer">
+                                @{Html.RenderAction("GetBankList", "Organization");}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="BankEntry" role="tabpanel" aria-labelledby="nav-BankEntry">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form id="frmBankEntry" action="">
+                            <div class="form-row">
+                                @Html.Hidden("hdfBankId", 0)
+                                <div class="form-group col-md-4">
+                                    <label class="control-label font-weight-bold" for="txtBankName">ব্যাংকের নাম</label>
+                                    <input type="text" id="txtBankName" value="" class="form-control" maxlength="150" />
+                                    <span class="error hide require-bankName">ব্যাংকের নাম আবশ্যক</span>
+                                    <span class="error hide duplicate-bankName">ডুপ্লিকেট ব্যাংক</span>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label class="control-label font-weight-bold" for="txtBranchName">শাখা</label>
+                                    <input type="text" id="txtBranchName" value="" class="form-control" maxlength="200" />
+                                    <span class="error hide require-branchName">ব্রাঞ্চের নাম আবশ্যক</span>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label class="control-label font-weight-bold" for="txtAccountNo">একাউন্ট নম্বর</label>
+                                    <input type="number" id="txtAccountNo" value="" class="form-control" maxlength="100" />
+                                    <span class="error hide require-accountNo">একাউন্ট নম্বর আবশ্যক</span>
+                                    <span class="error hide duplicate-account">ডুপ্লিকেট একাউন্ট নম্বর</span>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label class="control-label font-weight-bold" for="ddlAccStatus">একাউন্ট পরিস্থিতি</label>
+                                    <select class="form-control" id="ddlAccStatus">
+                                        <option value="">সিলেক্ট করুন</option>
+                                        <option value="1">সচল আছে</option>
+                                        <option value="2">বন্ধ আছে</option>
+                                    </select>
+                                    <span class="error hide require-bankStatus">একাউন্ট পরিস্থিতি আবশ্যক</span>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label class="control-label font-weight-bold" style="visibility:hidden">Bank Submit</label>
+                                    <div>
+                                        <button type="button" class="btn btn-icon btn-success" id="btnBankSubmit">সেভ করুন</button>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-4">
+
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="BankFundOpeningList" role="tabpanel" aria-labelledby="nav-BankFundOpeningList">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form id="frmFundBankOB">
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <input type="text" name="search3" id="searchBy3" class="form-control form-control-sm" placeholder="যেকোন কিছু দিয়ে সার্চ করুন" onkeyup="tableFilter('#tblFundBankOB tbody tr',this)" />
+                                </div>
+                                <div class="form-group col-md-4"></div>
+                                <div class="form-group col-md-4">
+                                    <button type="button" id="btnAddNewOB" class="btn btn-icon btn-primary float-right">নতুন ওপেনিং ব্যালেন্স এড করুন</button>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-12" id="dataOBContainer">
+                                    @{Html.RenderAction("GetFundBankOBList", "Organization");}
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalOB" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header btn-warning">
+                <h4 class="modal-title">ফান্ড ব্যাংক জের সংযুক্ত করন</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="frmFundBankOBEntry">
+                    <div class="form-row">
+                        @Html.Hidden("hdfFundOBId")
+                        <div class="form-group col-md-12">
+                            <label class="control-label font-weight-bold" for="">ব্যাংকঃ</label>
+                            <select id="ddlBankOB" class="form-control">
+                                <option value="">ব্যাংক সিলেক্ট করুন</option>
+                            </select>
+                            <span class="error hide ob-bank">ব্যাংক একাউন্ট আবশ্যক</span>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label font-weight-bold" for="">ফান্ডঃ</label>
+                            <select id="ddlFundOB" class="form-control">
+                                <option value="">ফান্ড সিলেক্ট করুন</option>
+                            </select>
+                            <span class="error hide ob-fund">ফান্ড আবশ্যক</span>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label font-weight-bold" for="">টাকার পরিমাণ</label>
+                            <input type="number" id="txtOpeningBalance" class="form-control" />
+                            <span class="error hide ob-amount">টাকার পরিমাণ আবশ্যক</span>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label font-weight-bold" for="">ব্যাংক তারিখঃ</label>
+                            <input type="date" id="dptOBDate" class="form-control" />
+                            <span class="error hide ob-bankDate">ব্যাংক তারিখ আবশ্যক</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer btn-light">
+                <div class="col-md-4">
+                    <div id="msg1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে সেভ হয়েছে।
+                    </div>
+                    <div id="msg2" class="alert alert-danger hide float-left">
+                        ডাটা সেভ হতে ব্যর্থ হয়েছে।
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" data-target="#modalOB">বাতিল করুন</button>
+                <button type="button" id="btnSubmitOB" class="btn btn-sm btn-success">সেভ করুন</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script type="text/javascript">
+
+        // Tab Panel 4 (Bank) //
+        var txtBankName = $("#txtBankName");
+        var txtBranchName = $("#txtBranchName");
+        var txtAccountNo = $("#txtAccountNo");
+        var ddlAccStatus = $("#ddlAccStatus")
+        var hdfBankId = $("#hdfBankId");
+
+
+        // Tab Panle 2 (BankCash)
+        var ddlBankWithAcc = $("#ddlBankWithAcc");
+        var txtAmount = $("#txtAmount");
+        var ddlFundInfo = $("#ddlFundInfo");
+        var ddlBankStatement = $("#ddlBankStatement");
+        var txtRemark = $("#txtRemark");
+        var hdfBankCashId = $("#hdfBankCashId");
+        var dptBankDate = $("#dptBankDate");
+        var txtChequeNo = $("#txtChequeNo");
+
+        // Search Control //
+        var ddlBankSearch = $("#ddlBankSearch");
+        var ddlFundSearch = $("#ddlFundSearch");
+        var ddlStatementSearch = $("#ddlStatementSearch");
+        var txtAmountSearch = $("#txtAmountSearch");
+        var spanFundBalance = $("#fundBalance");
+
+        // Tab Panel 5 OB
+        var ddlBankOB = $("#ddlBankOB");
+        var ddlFundOB = $("#ddlFundOB");
+        var txtOpeningBalance = $("#txtOpeningBalance");
+        var dptOBDate = $("#dptOBDate");
+        var hdfFundOBId = $("#hdfFundOBId");
+
+        var tblRowCount = $("#tbl-row-count");
+
+        $(document).ready(function () {
+            spanFundBalance.text('');
+            LoadDropDown('/Common/GetBankWithAcc', 'POST', ddlBankWithAcc);
+            LoadDropDown('/Common/GetFundInfoForDDL', 'POST', ddlFundInfo);
+            //--------//
+            LoadDropDown('/Common/GetBankWithAcc', 'POST', ddlBankSearch);
+            LoadDropDown('/Common/GetFundInfoForDDL', 'POST', ddlFundSearch);
+
+            LoadDropDown('/Common/GetBankWithAcc', 'POST', ddlBankOB);
+            LoadDropDown('/Common/GetFundInfoForDDL', 'POST', ddlFundOB);
+
+            fntableRowCount("tblBankCashList", "tbl-row-count");
+        })
+
+        $(document).on('change', '.search-ctrl-change', function () {
+            LoadBankCashData()
+        })
+
+        txtAmountSearch.keyup(function () {
+            LoadBankCashData();
+        })
+
+        ddlBankWithAcc.change(function () {
+            spanFundBalance.removeClass('text-danger');
+            spanFundBalance.addClass('text-warning');
+            spanFundBalance.text('');
+            LoadFundBankBalance();
+        })
+
+        ddlFundInfo.change(function () {
+            spanFundBalance.removeClass('text-danger');
+            spanFundBalance.addClass('text-warning');
+            spanFundBalance.text('');
+            LoadFundBankBalance()
+        })
+
+        function LoadFundBankBalance() {
+            if (TryParseInt(ddlBankWithAcc.val(), 0) > 0 && TryParseInt(ddlFundInfo.val(), 0)) {
+                var data = JSON.stringify({ bankId: ddlBankWithAcc.val(), fundInfoId: ddlFundInfo.val() });
+                //fnCallback(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Common/GetFundBankBalance', data, getToken()));
+                //console.log("After Ajax");
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Common/GetFundBankBalance', data, getToken())).then(function (res, status) {
+                    if (status == "success") {
+                        if (res > 0) {
+                            spanFundBalance.removeClass('text-danger');
+                            spanFundBalance.addClass('text-warning');
+                        }
+                        else {
+                            spanFundBalance.removeClass('text-warning');
+                            spanFundBalance.addClass('text-danger');
+                        }
+                        spanFundBalance.text('(ব্যালেন্সঃ ' + res + ')');
+                    }
+                }).fail(function (error) {
+                    console.log(error);
+                    alert(execuStatus.fail);
+                    })
+                //console.log("After Ajax 2");
+            }
+        }
+
+        function LoadBankCashData() {
+            var data = { fundId: TryParseInt(ddlFundSearch.val(), 0), bankId: TryParseInt(ddlBankSearch.val(), 0), statement: ddlStatementSearch.val(), amount: txtAmountSearch.val(), flag: 'edit' };
+            console.log(data);
+            tblRowCount.text('0');
+            $.when(getReqWithData('html', 'GET', '/Organization/GetCashBankTransferList', data)).then(function (res, status) {
+                console.log(res);
+                console.log(status);
+                if (status == "success") {
+                    $("#BankCashListContainer").empty();
+                    $("#BankCashListContainer").append(res);
+                    fntableRowCount("tblBankCashList", "tbl-row-count");
+                }
+            }).fail(function (error) {
+                alert(execuStatus.fail);
+                console.log(error);
+            })
+        }
+
+        // BankCash Part
+        function validateBankCash() {
+            var isValid = true;
+            $(".error").addClass('hide');
+            if (TryParseInt(ddlBankWithAcc.val(), 0) <= 0) {
+                $(".bankcash-bank").removeClass('hide');
+                isValid = false;
+            }
+
+            if (TryParseInt(txtAmount.val(), 0) <= 0) {
+                $(".bankcash-amount").removeClass('hide');
+                isValid = false;
+            }
+
+            if (TryParseInt(ddlFundInfo.val(), 0) <= 0) {
+                $(".bankcash-fund").removeClass('hide');
+                isValid = false;
+            }
+
+            if (dptBankDate.val().trim() == '') {
+                $(".bankcash-bankDate").removeClass('hide');
+                isValid = false;
+            }
+
+            if (TryParseInt(ddlBankStatement.val(), 0) <= 0) {
+                $(".bankcash-statement").removeClass('hide');
+                isValid = false;
+            }
+            else {
+                if (TryParseInt(ddlBankStatement.val(), 0) == 2)
+                {
+                    LoadFundBankBalance();
+                    if (spanFundBalance.text().trim() == '') {
+                        alert('ব্যাংক ব্যলেন্স লোড হয়নি');
+                        isValid = false;
+                    }
+                    else {
+                        var balance = spanFundBalance.text().substring(spanFundBalance.text().indexOf(' ') + 1, spanFundBalance.text().length - 1);
+                        balance = TryParseFloat(balance, 0);
+
+                        if (TryParseFloat(txtAmount.val(), 0) > balance) {
+                            $(".bankcash-limitcross").removeClass('hide');
+                            isValid = false;
+                        }
+                        if (txtChequeNo.val().trim() == '') {
+                            $(".bankcash-chequeNo").removeClass('hide');
+                            isValid = false;
+                        }
+                        else {
+                            if (TryParseInt(ddlBankWithAcc.val(), 0) > 0 && TryParseInt(ddlFundInfo.val(), 0) > 0)
+                            {
+                                var data = JSON.stringify({ bankId: ddlBankWithAcc.val(), fundInfoId: ddlFundInfo.val(), chequeNo: txtChequeNo.val() });
+                                if (ajaxBooleanChecker(data, '/Common/IsChequeNoExist', getToken()) == true) {
+                                    $(".bankcash-duplicateChequeNo").removeClass('hide');
+                                    isValid = false;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (TryParseInt(ddlBankStatement.val(), 0) == 1)
+                {
+                    if (TryParseInt(ddlFundInfo.val(), 0) > 0)
+                    {
+                        //cashBalnc
+                        $('#cashBalnc').text('')
+                        console.log("Check Cash");
+                        var data = JSON.stringify({ fundInfoId: ddlFundInfo.val() });
+                        var cash = JSON.parse(ajaxValueChecker(data, '/Common/GetFundCashBalance', getToken()));
+                        console.log("Cash Balance " + cash);
+                        console.log("Amount=== " + txtAmount.val());
+                        if (!isNaN(cash))
+                        {
+                            if (parseFloat(txtAmount.val()) > cash)
+                            {
+                                $('#cashBalnc').text('(' + cash+')')
+                                $('.cashbalance-limitcross').removeClass('hide');
+                                isValid = false;
+                            }
+                        }
+                        
+                    }
+                }
+            }
+            return isValid;
+        }
+
+        function clearBankCashCtrl() {
+            ddlBankWithAcc.val('');
+            txtAmount.val('0');
+            ddlFundInfo.val('');
+            ddlBankStatement.val('');
+            txtRemark.val('');
+            hdfBankCashId.val('0')
+            spanFundBalance.text('');
+            $('#cashBalnc').text('')
+        }
+
+        $("#btnBankCashSubmit").click(function (e) {
+            e.preventDefault();
+            if (validateBankCash() == true) {
+                //return;
+                disable("#btnBankCashSubmit");
+                var id = TryParseInt(hdfBankCashId.val(), 0);
+
+                var cash2bank = TryParseInt(ddlBankStatement.val(), 0) == 1 ? txtAmount.val() : null;
+                var bank2cash = TryParseInt(ddlBankStatement.val(), 0) == 2 ? txtAmount.val() : null;
+
+                var data = JSON.stringify({ Id: id, BankId: ddlBankWithAcc.val(), BankToCash: bank2cash, CashToBank: cash2bank, Remark: txtRemark.val(), FundInfoId: ddlFundInfo.val(), BankDate: dptBankDate.val().trim(), ChequeNo: txtChequeNo.val() })
+                console.log(data);
+
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Organization/SaveCashBankTransfer', data, getToken())).then(function (res, status) {
+                    if (res == true) {
+                        alert("ডাটা সফলভাবে সেভ হয়েছে");
+                        clearBankCashCtrl();
+                        location.reload();
+                    }
+                }).fail(function (error) {
+                    console.log(error);
+                })
+                enable("#btnBankCashSubmit");
+            }
+        })
+
+        $(document).on('click', 'a.data-edit-bankcashitem', function (e) {
+            e.preventDefault();
+            clearBankCashCtrl();
+            var id = { id: $(this).attr("data-edit-bankcashitem") };
+            hdfBankCashId.val($(this).attr("data-edit-bankcashitem"));
+
+            $.when(getReqWithData(dataType.json, 'GET', '/Organization/GetCashBankTransferById', id)).then(function (res, status) {
+                if (res != null) {
+                    activetabpane("#nav-CashSendReceiveEntry");
+                    ddlBankWithAcc.val(res.BankId);
+                    txtAmount.val(res.Amount);
+                    ddlFundInfo.val(res.FundId);
+                    ddlBankStatement.val(res.IsBank2Cash);
+                    txtRemark.val(res.Remark);
+                    console.log(res);
+                }
+            }).fail(function (error) {
+                alert(execuStatus.fail);
+                console.log(error);
+            })
+        })
+
+        // Bank Part
+        function validateBank() {
+            var isValid = true;
+            $(".error").addClass('hide');
+            if (txtBankName.val().trim() == '') {
+                $(".require-bankName").removeClass('hide');
+                isValid = false;
+            }
+            else {
+                var data = JSON.stringify({ id: TryParseInt(hdfBankId.val(), 0), bankName: txtBankName.val() })
+                if (ajaxBooleanChecker(data, '/Common/IsBankExist', getToken()) == true) {
+                    $(".duplicate-bankName").removeClass("hide");
+                    isValid = false;
+                }
+            }
+            if (txtBranchName.val().trim() == '') {
+                $(".require-branchName").removeClass('hide');
+                isValid = false;
+            }
+            if (TryParseInt(txtAccountNo.val().trim(), 0) <= 0) {
+                $(".require-accountNo").removeClass('hide');
+                isValid = false;
+            }
+            else {
+                var data = JSON.stringify({ id: TryParseInt(hdfBankId.val(), 0), bankAcc: txtAccountNo.val() })
+                if (ajaxBooleanChecker(data, '/Common/IsBankAccExist', getToken()) == true) {
+                    $(".duplicate-account").removeClass("hide");
+                    isValid = false;
+                }
+            }
+            if (TryParseInt(ddlAccStatus.val(), 0) == 0) {
+                $(".require-bankStatus").removeClass('hide');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Save Bank
+        $("#btnBankSubmit").click(function (e) {
+            e.preventDefault();
+            if (validateBank() == true) {
+                disable("#btnBankSubmit");
+                var isActive = (TryParseInt(ddlAccStatus.val(), 0) == 2 || TryParseInt(ddlAccStatus.val(), 0) == 0) ? false : true;
+                var data = JSON.stringify({ BankId: TryParseInt(hdfBankId.val(), 0), BankName: txtBankName.val(), BranchName: txtBranchName.val(), AccountNo: txtAccountNo.val(), IsActive: isActive });
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Organization/SaveBank', data, getToken())).then(function (res, status) {
+                    if (res == true) {
+                        alert("ডাটা সফলভাবে সেভ হয়েছে");
+                        $(".tab-pane fade").removeClass("show active");
+                        //$("#BankList").addClass("show active")
+                        clearBankCtrl();
+                        location.reload();
+                        //$("#BankList").addClass("show active")
+                    }
+                }).fail(function (error) {
+                    console.log(error);
+                })
+                enable("#btnBankSubmit");
+            }
+        })
+
+        function clearBankCtrl() {
+            hdfBankId.val('0');
+            txtBankName.val('');
+            txtBranchName.val('');
+            txtAccountNo.val('');
+            ddlAccStatus.val('');
+        }
+
+        $(document).on('click', 'a.data-edit-bankitem', function (e) {
+            e.preventDefault();
+            clearBankCtrl();
+            activetabpane('#nav-BankEntry');
+            var row = $(this).parent().parents('tr');
+            var td1 = row.find('td:eq(1)').html();
+            var td2 = row.find('td:eq(2)').html();
+            var td3 = row.find('td:eq(3)').html();
+            var td4 = row.find('td:eq(4)').html();
+            var td5 = row.find('td:eq(5)').html();
+            //alert(td1);
+            hdfBankId.val(td1);
+            txtBankName.val(td2);
+            txtBranchName.val(td3);
+            txtAccountNo.val(td4);
+            if (td5 == 'সচল আছে') {
+                ddlAccStatus.val('1');
+            }
+            else if (td5 == 'বন্ধ আছে') {
+                ddlAccStatus.val('2');
+            }
+            else {
+                ddlAccStatus.val('');
+            }
+
+        })
+
+        function clearCtrlOB() {
+            ddlFundOB.val('');
+            ddlBankOB.val('');
+            txtOpeningBalance.val('');
+            dptOBDate.val('');
+            hdfFundOBId.val('0')
+            enable("#ddlBankOB");
+            enable("#ddlFundOB");
+            enable("#dptOBDate");
+        }
+
+        $(document).on('click', 'a.bankLink', function (e) {
+            e.preventDefault();
+            clearBankCashCtrl();
+            clearBankCtrl();
+            clearCtrlOB();
+            enable("#ddlBankOB");
+            enable("#ddlFundOB");
+            enable("#dptOBDate");
+        })
+
+        function activetabpane(tabId) {
+            $('.error').addClass('hide');
+            $(tabId).trigger('click');
+        }
+
+        // Tab Panel 5
+        $("#btnSubmitOB").click(function (e) {
+            e.preventDefault()
+            if (validateOB() == true)
+            {
+                disable("#btnSubmitOB");
+                var id = TryParseInt(hdfFundOBId.val(), 0);
+
+                var data = JSON.stringify({ Id: id, BankId: ddlBankOB.val(), FundInfoId: ddlFundOB.val(), Amount: txtOpeningBalance.val(), BankDateEN: dptOBDate.val().trim() });
+
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Organization/SaveFundBankOB', data, getToken())).then(function (res, status) {
+                    if (res == true) {
+                        clearCtrlOB();
+                        message("#msg1", "#modalFundInfo");
+                        
+                    } else {
+                        message("#msg2");
+                    }
+                    enable("#btnSubmitOB");
+                }).fail(function (error) {
+                    console.log(error);
+                    enable("#btnSubmitOB");
+                })
+                enable("#btnSubmitOB");
+            }
+        })
+
+        function validateOB() {
+            var isValid = true;
+            $(".error").addClass('hide');
+            if (TryParseInt(ddlBankOB.val(), 0) == 0) {
+                $('.ob-bank').removeClass('hide');
+                isValid = false;
+            }
+            if (TryParseInt(ddlFundOB.val(), 0) == 0) {
+                $('.ob-fund').removeClass('hide');
+                isValid = false;
+            }
+            if (TryParseFloat(txtOpeningBalance.val(), 0) <= 0) {
+                $('.ob-amount').removeClass('hide');
+                isValid = false;
+            }
+            if (dptOBDate.val().trim() == '') {
+                $('.ob-bankDate').removeClass('hide');
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        $("#btnAddNewOB").click(function (e)
+        {
+            e.preventDefault();
+            OpenModal();    
+        })
+
+        $(document).on('click', "a.data-edit-ob-item", function (e)
+        {
+            clearCtrlOB();
+            e.preventDefault();
+            OpenModal();
+            var tr = $(this).parent().parents('tr');
+            hdfFundOBId.val(tr.find('td:eq(1)').html())
+            disable("#ddlBankOB");
+            disable("#ddlFundOB");
+            disable("#dptOBDate");
+            ddlBankOB.val(tr.find('td:eq(3)').html());
+            ddlFundOB.val(tr.find('td:eq(5)').html());
+            txtOpeningBalance.val(tr.find('td:eq(7)').html());
+            dptOBDate.val(tr.find('td:eq(8)').html());
+        })
+
+        function OpenModal() {
+            clearCtrlOB();
+            $("#modalOB").modal('show')
+        }
+
+
+    </script>
+}

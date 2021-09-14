@@ -1,0 +1,49 @@
+﻿@model IEnumerable<VmFundBankOB>
+@{
+    int sl = 0;
+
+}
+
+<table class="table table-bordered table-sm table-responsive-lg" id="tblFundBankOB">
+    <thead class="text-center btn-info">
+        <tr>
+            <th>SL No.</th>
+            <th class="hide"></th>
+            <th>ব্যাংকের নাম</th>
+            <th class="hide"></th>
+            <th>ফান্ডের নাম</th>
+            <th class="hide"></th>
+            <th>টাকার পরিমাণ</th>
+            <th class="hide">Amount</th>
+            <th>এন্ট্রি তারিখ</th>
+            <th>অ্যাকশান</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            sl = sl + 1;
+            <tr>
+                <td class="text-center">@sl</td>
+                <td class="hide">@item.Id</td>
+                <td>@item.BankName</td>
+                <td class="hide">@item.BankId</td>
+                <td>@item.FundNameBN</td>
+                <td class="hide">@item.FundInfoId</td>
+                <td align="right"><b>@item.AmountBN</b></td>
+                <td class="hide">@item.Amount</td>
+                <td class="hide">@item.BankDateEN</td>
+                <td class="text-center">@item.BankDateBN</td>
+                <td class="text-center">
+                    <a href="#" class="btn btn-sm btn-icon btn-warning data-edit-ob-item" data-edit-ob-item="@item.Id">এডিট</a>
+                </td>
+            </tr>
+        }
+        @if (Model.Count() == 0)
+        {
+            <tr class="text-center">
+                <td colspan="10">কোন ডাটা পাওয়া যায়নি...</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,76 @@
+﻿@model IEnumerable<VmRevenueExpenseDto>
+@{
+    ViewBag.Title = "Revenue Expense List";
+    int sl = 0;
+    Layout = null;
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-bordered table-sm table-responsive-lg table-hover" id="tblRevenueExpenseList">
+            <thead>
+                <tr class="text-center btn-info">
+                    <th style="vertical-align:middle">SL</th>
+                    <th class="hide"></th>
+                    <th style="vertical-align:middle">Charge Name</th>
+                    <th class="hide"></th>
+                    <th style="vertical-align:middle">ফান্ডের নাম</th>
+                    <th class="hide"></th>
+                    <th style="vertical-align:middle">সাব-ফান্ডের নাম</th>
+                    <th class="hide"></th>
+                    <th style="vertical-align:middle">খাত</th>
+                    <th style="vertical-align:middle">তারিখ</th>
+                    <th style="vertical-align:middle">বিল প্রদান/গ্রহন</th>
+                    <th class="hide"></th>
+                    <th style="vertical-align:middle">টাকার পরিমাণ</th>
+                    <th style="vertical-align:middle">মন্তব্য</th>
+                    <th style="vertical-align:middle">অ্যাকশান</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    sl = sl + 1;
+                    <tr>
+                        <td class="text-center">@sl</td>
+                        <td class="hide">@item.RevExId</td>
+                        <td>@item.RevExName</td>
+                        <td class="hide">@item.FundInfoId</td>
+                        <td>@item.FundNameBN</td>
+                        <td class="hide">@item.FundDetailId</td>
+                        <td>@item.FundDetailNameBN</td>
+                        <td class="hide">@item.Type</td>
+                        <td>@item.TypeBN</td>
+                        <td>@item.BillDate</td>
+                        <td>@item.PayFromOrPayTo</td>
+                        <td class="hide">@item.Amount</td>
+                        <td>@item.AmountBN</td>
+                        <td>@item.Remark</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-icon btn-warning btn-sm data-edit-item" data-edit-item="@item.RevExId"><i class="far fa-edit"></i> এডিট </a>
+                            <a href="#" class="btn btn-icon btn-danger btn-sm data-del-item hide" data-del-item="@item.RevExId"><i class="far fa-remove"></i> ডিলেট </a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count() == 0)
+                {
+                    <tr class="text-center empty-row">
+                        <td colspan="15">
+                            কোন ডাটা পাওয়া যায়নি...
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            @if (Model.Count() > 0)
+            {
+                <tr style="background-color:gainsboro;font-weight:bold;color:#000">
+                    <td colspan="3" style="text-align:right">মোট আয়</td>
+                    <td colspan="3" style="text-align:right">@ViewBag.Revenue</td>
+                    <td colspan="2" style="text-align:right">মোট ব্যয়</td>
+                    <td colspan="3" style="text-align:right">@ViewBag.Expense</td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>
+

@@ -1,0 +1,69 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ViewModels.VmChargeBillingView>
+
+<div class="form-row">
+    <div class="form-group col-md-12"></div>
+    <div class="form-group col-md-12">
+        <table class="table table-bordered table-responsive-lg" id="tblCharging">
+            <tbody>
+                <tr></tr>
+                @foreach (var item in Model)
+                {
+                    if (item.FundDetailNameBN == "বিদ্যুৎ বিল আদায়")
+                    {
+                        <tr class="btn-info">
+                            <td class="hide"></td>
+                            <td class="hide"></td>
+                            <td class="hide"></td>
+                            <td>চার্জের নাম</td>
+                            <td>পূর্বের রিডিং</td>
+                            <td>বর্তমান রিডিং</td>
+                            <td>ব্যবহিত ইউনিট</td>
+                            <td>ইউনিট রেট</td>
+                            <td>টাকার পরিমাণ</td>
+                        </tr>
+                        <tr class="btn-info">
+                            <td class="hide">@item.ShopId</td>
+                            <td class="hide">@item.FundInfoId</td>
+                            <td class="hide">@item.FundDetailId</td>
+                            <td>@item.FundDetailNameBN</td>
+                            <td>
+                                <input type="number" class="form-control form-control-sm form-keyup prev-unit" />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control form-control-sm curr-unit form-keyup" />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control form-control-sm form-keyup consume-unit" />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control form-control-sm elec-rate form-keyup" value="@item.ChargeAmountEN" />
+                            </td>
+                            <td>
+                                <input type="number" id="txtCAmount" class="form-control form-control-sm" />
+                            </td>
+                        </tr>
+                    }
+                    else if (item.IsFan)
+                    {
+                        <tr class="btn-warning">
+                            <td class="hide">@item.ShopId</td>
+                            <td class="hide">@item.FundInfoId</td>
+                            <td class="hide">@item.FundDetailId</td>
+                            <td colspan="3">@item.FundDetailNameBN</td>
+                            <td>
+                                <input type="number" id="txtFanUnit" class="form-control form-control-sm fan-consumFan" />
+                            </td>
+                            <td>
+                                <input type="number" id="txtFRate" class="form-control form-control-sm fan-rate" value="@item.ChargeAmountEN" />
+                            </td>
+                            <td>
+                                <input type="number" id="txtFAmount" class="form-control form-control-sm" />
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

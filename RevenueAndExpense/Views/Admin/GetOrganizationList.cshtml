@@ -1,0 +1,303 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ViewModels.VmOrganization>
+
+@{
+    ViewBag.Title = "List Of Organization";
+    string status = string.Empty;
+    int slNo = 0;
+}
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h4>List Of Organization</h4>
+        <hr />
+    </div>
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-4">
+                <input type="text" name="search" id="searchBy" class="form-control form-control-sm" placeholder="Search By Anything" onkeyup="tableFilter('#tblOrganization tbody tr',this)" />
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <button class="btn btn-primary float-lg-right" id="btnAddNew"><i class="fa fa-plus"></i> Add New Organization</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <table class="table table-bordered table-hover table-sm table-responsive-lg" id="tblOrganization">
+            <thead class="btn-info text-center">
+                <tr>
+                    <th>SL No.</th>
+                    <th class="hide">Id</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Email</th>
+                    <th>Mobile No</th>
+                    <th>Phone No</th>
+                    <th>Fax</th>
+                    <th>Status</th>
+                    <th>Entry User</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    status = item.IsActive == true ? "Active" : "Inactive";
+                    slNo = slNo + 1;
+                    <tr>
+                        <td class="text-center">@slNo</td>
+                        <td class="hide">@item.OrganizationId</td>
+                        <td>@item.OrganizationName</td>
+                        <td>@item.Address</td>
+                        <td>@item.Email</td>
+                        <td>@item.MobileNo</td>
+                        <td>@item.PhoneNo</td>
+                        <td>@item.Fax</td>
+                        <td>@status</td>
+                        <td>@item.EntryUser</td>
+                        <td>
+                            <a href="#" class="btn btn-icon btn-warning data-edit-item" data-edit-item="@item.OrganizationId" title="Edit"><i class="far fa-edit"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalOrg" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header btn-primary">
+                <h4 id="modalHeading" class="modal-title">Add New Organization</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="frmOrg">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="hdfOrgId" />
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="txtOrganizationName">Name:</label>
+                            <input type="text" id="txtOrganizationName" class="form-control form-control-sm" />
+                            <span class="error hide required-org">Name is required</span>
+                            <span class="error hide duplicate-org">Duplicate Org Name</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="txtAddress">Address:</label>
+                            <textarea type="text" id="txtAddress" class="form-control form-control-sm" cols="50" rows="1"></textarea>
+                            <span class="error hide required-address">Address is required</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="txtEmail">Email:</label>
+                            <input type="Email" id="txtEmail" class="form-control form-control-sm" />
+                            <span class="error hide required-email">Email is required</span>
+                            <span class="error hide invalid-email">Invalid Email</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="txtMobileNo">Mobile No:</label>
+                            <input type="text" id="txtMobileNo" class="form-control form-control-sm" />
+                            <span class="error hide required-mobile">Mobile No is required</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="txtPhoneNo">Phone No:</label>
+                            <input type="text" id="txtPhoneNo" class="form-control form-control-sm" />
+                            <span class="error hide required-phone">Phone No is required</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="txtFax">Fax No:</label>
+                            <input type="text" id="txtFax" class="form-control form-control-sm" />
+                            <span class="error hide required-phone">Fax No is required</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" style="visibility:hidden">Is Active?</label>
+                            <span class="form-control form-control-sm">
+                                <input type="checkbox" id="chkIsActive" /> Is Active?
+                            </span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="txtRegistration">Registration No:</label>
+                            <input type="text" id="txtRegistration" class="form-control form-control-sm" placeholder="" />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="txtLicence">Licence No:</label>
+                            <input type="text" id="txtLicence" class="form-control form-control-sm" placeholder="" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="txtOrganizationNameBN">প্রতিষ্ঠানের নাম:</label>
+                            <input type="text" id="txtOrganizationNameBN" class="form-control form-control-sm" placeholder="বাংলায় লেখুন" />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="txtAddressBN">প্রতিষ্ঠানের ঠিকানা:</label>
+                            <input type="text" id="txtAddressBN" class="form-control form-control-sm" placeholder="বাংলায় লেখুন" />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="txtRegistrationBN">রেজি: নংঃ</label>
+                            <input type="text" id="txtRegistrationBN" class="form-control form-control-sm" placeholder="বাংলায় লেখুন" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="txtLicenceBN">লাইসেন্স নংঃ</label>
+                            <input type="text" id="txtLicenceBN" class="form-control form-control-sm" placeholder="বাংলায় লেখুন" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer btn-light">
+                <div class="col-md-4">
+                    <div id="msg1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে সেভ হয়েছে।
+                    </div>
+                    <div id="msg2" class="alert alert-danger hide float-left">
+                        ডাটা সেভ হতে ব্যর্থ হয়েছে।
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success float-right" id="btnSubmit"><i class="fas fa-save"></i> <span id="submitTxt">Save</span> </button>
+                <button type="button" class="btn btn-danger float-right" data-dismiss="modal" data-target="#"><i class="fas fa-times"></i> Cancel </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        var hdfOrgId = $("#hdfOrgId");
+        var txtOrganizationName = $("#txtOrganizationName");
+        var txtAddress = $("#txtAddress");
+        var txtEmail = $("#txtEmail");
+        var txtMobileNo = $("#txtMobileNo");
+        var txtPhoneNo = $("#txtPhoneNo");
+        var txtFax = $("#txtFax");
+        var chkIsActive = $("#chkIsActive");
+        var txtOrganizationNameBN = $("#txtOrganizationNameBN");
+        var txtAddressBN = $("#txtAddressBN");
+        var txtRegistrationBN = $("#txtRegistrationBN");
+        var txtLicenceBN = $("#txtLicenceBN");
+        var txtLicence = $("#txtLicence");
+        var txtRegistration = $("#txtRegistration");
+
+        $("#btnAddNew").click(function (e) {
+            e.preventDefault();
+            OpenModal();
+        })
+
+        function OpenModal() {
+            clearControl();
+            $("#modalHeading").text('Add New Organization');
+            $("#modalOrg").modal("show");
+            $("#submitTxt").text(' Save ')
+        }
+
+        function clearControl() {
+            hdfOrgId.val('0');
+            txtOrganizationName.val('');
+            txtAddress.val('');
+            txtEmail.val('');
+            txtMobileNo.val('');
+            txtPhoneNo.val('');
+            txtFax.val('');
+            txtOrganizationNameBN.val('');
+            txtAddressBN.val('');
+            txtRegistrationBN.val('');
+            txtLicenceBN.val('');
+            txtLicence.val('');
+            txtRegistration.val('');
+            chkIsActive.prop("checked", false);
+        }
+
+        function validateForm() {
+            var isValid = true;
+            $(".error").addClass("hide");
+            if ($.trim(txtOrganizationName.val()) == '') {
+                $(".required-org").removeClass("hide");
+                isValid = false;
+            }
+            if ($.trim(txtAddress.val()) == '') {
+                $(".required-address").removeClass("hide");
+                isValid = false;
+            }
+            if ($.trim(txtEmail.val()) == '') {
+                $(".required-email").removeClass("hide");
+                isValid = false;
+            }
+            else {
+                $(".required-email").addClass("hide");
+                if (txtEmail.val().trim().match(/^([a-zA-Z0-9_\-\.]+)@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{1,5}|[0-9]{1,3})(\]?)$/) == null) {
+                    isValid = false;
+                    $(".invalid-email").removeClass("hide");
+                }
+            }
+            if ($.trim(txtPhoneNo.val()) == '') {
+                $(".required-phone").removeClass("hide");
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        $("#btnSubmit").click(function (e) {
+            e.preventDefault();
+            if (validateForm() == true) {
+                var id = TryParseInt(hdfOrgId.val(), 0);
+                var data = JSON.stringify({ OrganizationId: id, OrganizationName: txtOrganizationName.val(), Address: txtAddress.val(), Email: txtEmail.val(), MobileNo: txtMobileNo.val(), PhoneNo: txtPhoneNo.val(), Fax: txtFax.val(), IsActive: chkIsActive.is(":checked"), OrganizationNameBN: txtOrganizationNameBN.val(), AddressBN:txtAddressBN.val(),RegistrationBN:txtRegistrationBN.val(),LicenceBN:txtLicenceBN.val(),Registration:txtRegistration.val(),Licence:txtLicence.val() });
+                //console.log(data);
+                //return;
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Admin/SaveOrganization', data, getToken())).then(function (res, status) {
+                    console.log(res);
+                    console.log(status);
+                    if (res == true) {
+                        message("#msg1", "#modalOrg");
+                    }
+                    else {
+                        message("#msg1");
+                    }
+                }).fail(function (error) {
+                    console.log(error);
+                    message("#msg1");
+                })
+            }
+        })
+
+        $(document).on("click", "a.data-edit-item", function (e) {
+            e.preventDefault();
+            var id = $(this).attr("data-edit-item");
+            var data = JSON.stringify({ id: id });
+            $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Admin/GetOrganizationById', data, getToken())).then(function (res, status) {
+                console.log(res);
+                console.log(status);
+                if (res != null) {
+                    OpenModal();
+                    $("#modalHeading").text('Update Organization');
+                    $("#submitTxt").text(' Update ')
+                    hdfOrgId.val(res.OrganizationId);
+                    txtOrganizationName.val(res.OrganizationName);
+                    txtAddress.val(res.Address);
+                    txtEmail.val(res.Email);
+                    txtMobileNo.val(res.MobileNo);
+                    txtPhoneNo.val(res.PhoneNo);
+                    txtFax.val(res.Fax);
+
+                    txtOrganizationNameBN.val(res.OrganizationNameBN);
+                    txtAddressBN.val(res.AddressBN);
+                    txtRegistrationBN.val(res.RegistrationBN);
+                    txtLicenceBN.val(res.LicenceBN);
+                    txtLicence.val(res.Licence);
+                    txtRegistration.val(res.Registration);
+                    chkIsActive.prop("checked", res.IsActive);
+                }
+            }).fail(function (error) {
+                console.log(error);
+                alert("Something went wrong/ No data found.");
+            })
+        })
+
+    </script>
+}
+

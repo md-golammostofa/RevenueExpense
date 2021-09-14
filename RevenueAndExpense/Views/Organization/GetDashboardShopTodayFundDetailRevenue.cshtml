@@ -1,0 +1,36 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ViewModels.VmDashboardFundDetail>
+@{
+    Layout = null;
+}
+<h5>@ViewBag.FundInfoBN</h5>
+
+<table class="table table-sm table-bordered table-responsive-lg">
+    <thead class="btn-success text-center">
+        <tr>
+            <th class="hide"></th>
+            <th>সাব-ফান্ডের নাম</th>
+            <th class="hide">AmountEN</th>
+            <th>টাকার পরিমাণ</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="hide">@item.FundDetailId</td>
+                <td>@item.FundDetailNameBN</td>
+                <td class="hide"></td>
+                <td align="right">@item.AmountBN</td>
+            </tr>
+        }
+        @if (Model.Count() > 0)
+        {
+            <tr>
+                <td class="hide">@ViewBag.TotalAmountBN</td>
+                <td align="right"><b>মোট টাকা</b></td>
+                <td align="right"><b>@ViewBag.TotalAmountBN</b></td>
+            </tr>
+        }
+
+    </tbody>
+</table>

@@ -1,0 +1,75 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.Models.MonthWiseShopCharge>
+
+
+<table class="table table-bordered table-responsive-lg">
+
+    <tr>
+        <td colspan="6">
+            <h4>@ViewBag.shopName</h4>
+        </td>
+    </tr>
+    @foreach (var item in Model)
+    {
+        if (item.Remark == "Electricity")
+        {
+            <tr class="btn-info">
+                <td>চার্জের নাম	</td>
+                <td>পূর্বের রিডিং</td>
+                <td>বর্তমান রিডিং</td>
+                <td>ব্যবহৃত ইউনিট	</td>
+                <td>ইউনিট রেট</td>
+                <td>টাকার পরিমাণ</td>
+            </tr>
+            <tr class="btn-info">
+                <td>@item.ChargeName</td>
+                <td>@item.PreviousReading</td>
+                <td>@item.CurrentReading</td>
+                <td>@item.ConsumUnit</td>
+                <td>@item.UnitRate</td>
+                <td>@item.Amount</td>
+            </tr>
+        }
+        else if (item.Remark == "Fan")
+        {
+            <tr class="btn-success">
+                <td colspan="3">@item.ChargeName</td>
+                <td>@item.ConsumUnit</td>
+                <td>@item.UnitRate</td>
+                <td>@item.Amount</td>
+            </tr>
+        }
+        else if (item.Remark == "RoadLine")
+        {
+            <tr class="btn-success">
+                <td colspan="3">@item.ChargeName</td>
+                <td>@item.ConsumUnit</td>
+                <td>@item.UnitRate</td>
+                <td>@item.Amount</td>
+            </tr>
+        }
+        else if (item.Remark == "Others")
+        {
+            <tr class="btn-warning">
+                <td colspan="5">@item.ChargeName</td>
+                <td>@item.Amount</td>
+            </tr>
+        }
+    }
+    @*@if (ViewBag.StateStatus == "Pending")
+        {
+            <tr>
+                <td colspan="4">
+                    <div id="msg1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে সেভ হয়েছে।
+                    </div>
+                    <div id="msg2" class="alert alert-danger hide float-left">
+                        ডাটা সেভ হতে ব্যর্থ হয়েছে।
+                    </div>
+                </td>
+                <td colspan="2">
+                    <a href="#" id="btnSubmitPending">Test</a>
+                </td>
+            </tr>
+        }*@
+</table>
+

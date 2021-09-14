@@ -1,0 +1,383 @@
+﻿@{
+    ViewBag.Title = "Create Shop Monthly Bill";
+}
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <a href="/Organization/ShopPanel" class="btn btn-primary float-left" title="লিস্টে ফিরে যান"><i class="fas fa-arrow-left"></i></a>
+        <h4 class="text-center">শপের মাসিক বিল</h4>
+        <hr />
+    </div>
+    <div class="col-md-12">
+        <div class="form-row">
+            <div class="form-group col-md-3">
+                @Html.AntiForgeryToken()
+                <label class="control-label font-weight-bold" for="ddlMonthAndYear">মাস এবং সালঃ</label>
+                @Html.DropDownList("ddlMonthAndYear", (IEnumerable<SelectListItem>)ViewBag.MonthAndYear, "সিলেক্ট মাস এবং সাল", new { @class = "form-control" })
+            </div>
+            <div class="form-group col-md-3">
+                <label class="control-label font-weight-bold" for="ddlFloor">ফ্লোরঃ</label>
+                @Html.DropDownList("ddlFloor", (IEnumerable<SelectListItem>)ViewBag.Floors, "সিলেক্ট ফ্লোর", new { @class = "form-control" })
+            </div>
+            <div class="form-group col-md-3">
+                <label class="control-label font-weight-bold" for="ddlHolding">হোল্ডিংঃ</label>
+                <select id="ddlHolding" class="form-control">
+                    <option value="">সিলেক্ট হোল্ডিং</option>
+                </select>
+            </div>
+        </div>
+        <hr />
+    </div>
+    <div class="col-md-12" id="dataChargeContainer">
+
+    </div>
+</div>
+
+<div id="modalShowCharge" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header btn-default">
+                <h4 id="modalHeading" class="modal-title">শপের মাসিক চার্জের বিল তৈরি করুন</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body" id="ChargeBillingView">
+
+            </div>
+            <div class="modal-footer">
+                <div class="col-md-7">
+                    <div id="msg1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে ডিলেট হয়েছে।
+                    </div>
+                    <div id="msg2" class="alert alert-danger hide float-left">
+                        কোন সম্যসা হয়েছে/ডাটা ডিলেট হয়নি।
+                    </div>
+                </div>
+                <button type="button" class="btn btn-danger float-right" data-dismiss="modal" data-target="#"> বাতিল করুন </button>
+                <button type="submit" class="btn btn-success float-right" id="btnSubmit"> সেভ করুন </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+
+        var ddlMonthAndYear = $("#ddlMonthAndYear");
+        var ddlFloor = $("#ddlFloor");
+        var ddlHolding = $("#ddlHolding");
+
+        ddlMonthAndYear.change(function () {
+            LoadShop();
+        })
+
+        ddlFloor.change(function () {
+            LoadShop();
+            clearDropdown("ddlHolding");
+            if (ddlFloor.val() != "") {
+                console.log("Floor Id " + ddlFloor.val());
+                LoadDropDown('/Common/GetHoldingsByFloorIdForDDL', 'POST', ddlHolding, JSON.stringify({ FloorId: ddlFloor.val() }));
+            }
+        })
+
+        ddlHolding.change(function () {
+            LoadShop();
+        })
+
+        function LoadShop() {
+            $("#dataChargeContainer").empty();
+            if (ddlMonthAndYear.val() != "" && ddlFloor.val() != "") {
+                var data = JSON.stringify({ chargeDate: ddlMonthAndYear.val(), floorId: ddlFloor.val(), holdingNo: TryParseInt(ddlHolding.val(), 0) });
+
+                $.when(postReqWithToken(dataType.applicationJson, 'html', 'POST', '/Organization/GetShopListForCharging', data, getToken())).then(function (res, status) {
+                    if (status == "success") {
+                        $("#dataChargeContainer").append(res);
+                    }
+                }).fail(function (error) {
+                    console.log(error);
+                })
+            }
+        }
+
+        $(document).on('click', 'a.data-monthly-charge-item', function (e) {
+            $("#ChargeBillingView").empty();
+            e.preventDefault();
+            var id = $(this).attr("data-monthly-charge-item");
+            var data = JSON.stringify({ shopId: id, date: ddlMonthAndYear.val() });
+
+            $.when(postReqWithData(dataType.applicationJson, dataType.html, 'POST', '/Organization/CreateShopBillView2', data)).then(function (res, status) {
+                if (status == "success") {
+                    $("#modalShowCharge").modal("show");
+                    $("#ChargeBillingView").empty();
+                    $("#ChargeBillingView").append(res);
+                }
+            }).fail(function (error) {
+                console.log(error);
+            })
+        })
+
+        $(document).on("keyup", ".form-keyup", function myfunction() {
+            var value = $(this).val();
+
+            var prevUnit = $(this).hasClass("prev-unit");
+            var currUnit = $(this).hasClass("curr-unit");
+            var elecRate = $(this).hasClass("elec-rate");
+            var fanConsumFan = $(this).hasClass("fan-consumFan");
+            var fanRate = $(this).hasClass("fan-rate");
+            var roadConsume = $(this).hasClass("road-consumRoadLine");//
+            var roadRate = $(this).hasClass("road-rate");//
+
+            if (prevUnit || currUnit || elecRate) {
+                var prev = $(this).parent().parents('tr').find('td:eq(2)').children("input[type='number']").val();
+                var current = $(this).parent().parents('tr').find('td:eq(3)').children("input[type='number']").val();
+                var rate = $(this).parent().parents('tr').find('td:eq(5)').children("input[type='number']").val();
+                var amt = $(this).parent().parents('tr').find('td:eq(6)').children("input[type='number']").val(0);
+                //alert(rate);
+                var diff = ((TryParseFloat(current, 0)) < (TryParseFloat(prev, 0))) ? 0 : (TryParseFloat(current, 0) - TryParseFloat(prev, 0));
+                if (diff > 0) {
+                    $(this).parent().parents('tr').find('td:eq(4)').children("input[type='number']").val(diff);
+                    var amt = diff <= 28 ? 300.00 : Math.round(diff * rate);
+                    if (rate > 0) {
+                        $(this).parent().parents('tr').find('td:eq(6)').children("input[type='number']").val(amt);
+                    }
+                    else {
+                        $(this).parent().parents('tr').find('td:eq(6)').children("input[type='number']").val(0);
+                        $(this).parent().parents('tr').find('td:eq(5)').children("input[type='number']").val(amt);
+                    }
+                }
+                else {
+                    $(this).parent().parents('tr').find('td:eq(4)').children("input[type='number']").val(0);
+                    $(this).parent().parents('tr').find('td:eq(6)').children("input[type='number']").val(300.00);
+                }
+            }
+
+            else if (fanConsumFan || fanRate) {
+                var fanElec = $(this).parent().parents('tr').find('td:eq(2)').children("input[type='number']").val();
+                var rate = $(this).parent().parents('tr').find('td:eq(3)').children("input[type='number']").val();
+                $(this).parent().parents('tr').find('td:eq(4)').children("input[type='number']").val(0);
+                if (TryParseFloat(fanElec, 0) > 0 && TryParseFloat(rate, 0) > 0) {
+                    $(this).parent().parents('tr').find('td:eq(4)').children("input[type='number']").val(Math.round(fanElec * rate));
+                }
+                else {
+                    $(this).parent().parents('tr').find('td:eq(2)').children("input[type='number']").val('');
+                }
+            }
+            else if (roadConsume || roadRate) {
+                var roadElec = $(this).parent().parents('tr').find('td:eq(2)').children("input[type='number']").val();
+                var rate = $(this).parent().parents('tr').find('td:eq(3)').children("input[type='number']").val();
+                $(this).parent().parents('tr').find('td:eq(4)').children("input[type='number']").val(0);
+                if (TryParseFloat(roadElec, 0) > 0 && TryParseFloat(rate, 0) > 0) {
+                    $(this).parent().parents('tr').find('td:eq(4)').children("input[type='number']").val(Math.round(roadElec * rate));
+                }
+                else {
+                    $(this).parent().parents('tr').find('td:eq(2)').children("input[type='number']").val('');
+                }
+            }
+        })
+
+        function validation() {
+            var isvalid = true;
+            if ($(".tblShopMonthlyChargeBillView tr").length == 0) {
+                isvalid = false;
+                return isvalid;
+            }
+
+            for (var i = 0; i < $(".tblShopMonthlyChargeBillView tr").length; i++) {
+                var tr = $(".tblShopMonthlyChargeBillView").find('tr:eq(' + i + ')');
+                if (tr.hasClass('electricityData')) {
+                    if (TryParseInt(tr.find("td:eq(2)").children("input[type='number']").val(), 0) <= 0) {
+                        alert("বিদ্যুৎ পূর্বের রিডিং আবশ্যক");
+                        isvalid = false;
+                        return isvalid;
+                    }
+                    if (TryParseInt(tr.find("td:eq(3)").children("input[type='number']").val(), 0) <= 0) {
+                        alert("বিদ্যুৎ বর্তমান রিডিং আবশ্যক");
+                        isvalid = false;
+                        return isvalid;
+                    }
+                    //if (TryParseInt(tr.find("td:eq(4)").children("input[type='number']").val(), 0) <= 0) {
+                    //    alert("বিদ্যুৎ ব্যবহিত ইউনিট	আবশ্যক");
+                    //    isvalid = false;
+                    //    return isvalid;
+                    //}
+                    if (TryParseInt(tr.find("td:eq(5)").children("input[type='number']").val(), 0) <= 0) {
+                        alert("বিদ্যুৎ ইউনিট রেট আবশ্যক");
+                        isvalid = false;
+                        return isvalid;
+                    }
+                    if (TryParseInt(tr.find("td:eq(6)").children("input[type='number']").val(), 0) <= 0) {
+                        alert("বিদ্যুৎ টাকার পরিমাণ আবশ্যক");
+                        isvalid = false;
+                        return isvalid;
+                    }
+                }
+                //if (tr.hasClass('FanData')) {
+                //    //console.log(tr.find("td:eq(2)").children("input[type='number']").val());
+                //    if (TryParseInt(tr.find("td:eq(2)").children("input[type='number']").val(), 0) <= 0) {
+                //        alert("ফ্যান ব্যবহিত ইউনিট আবশ্যক");
+                //        isvalid = false;
+                //        return isvalid;
+                //    }
+                //    //console.log("ফ্যান ইউনিট রেট আবশ্যক");
+                //    //console.log(tr.find("td:eq(3)").children("input[type='number']").val())
+                //    if (TryParseInt(tr.find("td:eq(3)").children("input[type='number']").val(), 0) <= 0) {
+                //        alert("ফ্যান ইউনিট রেট আবশ্যক");
+                //        isvalid = false;
+                //        return isvalid;
+                //    }
+                //    if (TryParseInt(tr.find("td:eq(4)").children("input[type='number']").val(), 0) <= 0) {
+                //        alert("ফ্যান টাকার পরিমাণ আবশ্যক");
+                //        isvalid = false;
+                //        return isvalid;
+                //    }
+                //}
+                if (tr.hasClass('OthersData')) {
+                    //console.log("Others")
+                    var txt = tr.find("td:eq(1)").children("input[type='hidden']").val();
+                    //console.log(txt);
+                    //console.log(tr.find("td:eq(2)").children("input[type='number']").val());
+                    if (TryParseInt(tr.find("td:eq(2)").children("input[type='number']").val(), 0) <= 0) {
+                        alert(txt + " টাকার পরিমাণ আবশ্যক");
+                        isvalid = false;
+                        return isvalid;
+                    }
+                }
+            }
+            return isvalid;
+        }
+
+        $("#btnSubmit").click(function (e) {
+            if ($(".tblShopMonthlyChargeBillView tr").length > 0) {
+                //alert("Data Ase");
+                //alert("Length " + $(".tblShopMonthlyChargeBillView tr").length)
+                if (validation() == true) {
+                    //disable("#btnSubmit");
+                    var data = [];
+                    data.length = 0;
+                    for (var i = 0; i < $(".tblShopMonthlyChargeBillView tr").length; i++) {
+                        var tr = $(".tblShopMonthlyChargeBillView").find('tr:eq(' + i + ')');
+                        if (tr.hasClass('electricityData')) {
+                            var td1 = tr.find("td:eq(0)");
+                            var td2 = tr.find("td:eq(1)");
+                            var td3 = tr.find("td:eq(2)");
+                            var td4 = tr.find("td:eq(3)");
+                            var td5 = tr.find("td:eq(4)");
+                            var td6 = tr.find("td:eq(5)");
+                            var td7 = tr.find("td:eq(6)");
+                            data.push(
+                                {
+                                    ChargeId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].ChargeId"]').val(),
+                                    ShopId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].ShopId"]').val(),
+                                    ChargeMonth: td1.children('input[name="ChargeDetails[' + (i - 1) + '].ChargeMonth"]').val(),
+                                    FundInfoId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].FundInfoId"]').val(),
+                                    FundNameBN: td1.children('input[name="ChargeDetails[' + (i - 1) + '].FundNameBN"]').val(),
+                                    FundDetailId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].FundDetailId"]').val(),
+                                    Remark: td1.children('input[name="ChargeDetails[' + (i - 1) + '].Remark"]').val(),
+                                    StateStatus: td1.children('input[name="ChargeDetails[' + (i - 1) + '].StateStatus"]').val(),
+                                    ChargeName: td2.children('input[name="ChargeDetails[' + (i - 1) + '].ChargeName"]').val(),
+                                    PreviousReading: td3.children("input[type='number']").val(),
+                                    CurrentReading: td4.children("input[type='number']").val(),
+                                    ConsumUnit: TryParseFloat(td5.children("input[type='number']").val(),0),
+                                    UnitRate: td6.children("input[type='number']").val(),
+                                    Amount: td7.children("input[type='number']").val()
+                                }
+                            )
+                        }
+                        if (tr.hasClass('FanData')) {
+                            var td1 = tr.find("td:eq(0)");
+                            var td2 = tr.find("td:eq(1)");
+                            var td3 = tr.find("td:eq(2)");
+                            var td4 = tr.find("td:eq(3)");
+                            var td5 = tr.find("td:eq(4)");
+                            data.push(
+                                {
+                                    ChargeId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].ChargeId"]').val(),
+                                    ShopId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].ShopId"]').val(),
+                                    ChargeMonth: td1.children('input[name="ChargeDetails[' + (i - 1) + '].ChargeMonth"]').val(),
+                                    FundInfoId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].FundInfoId"]').val(),
+                                    FundNameBN: td1.children('input[name="ChargeDetails[' + (i - 1) + '].FundNameBN"]').val(),
+                                    FundDetailId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].FundDetailId"]').val(),
+                                    Remark: td1.children('input[name="ChargeDetails[' + (i - 1) + '].Remark"]').val(),
+                                    StateStatus: td1.children('input[name="ChargeDetails[' + (i - 1) + '].StateStatus"]').val(),
+                                    ChargeName: td2.children('input[name="ChargeDetails[' + (i - 1) + '].ChargeName"]').val(),
+                                    PreviousReading: td1.children('input[name="ChargeDetails[' + (i - 1) + '].PreviousReading"]').val(),
+                                    CurrentReading: td1.children('input[name="ChargeDetails[' + (i - 1) + '].CurrentReading"]').val(),
+                                    ConsumUnit: td3.children("input[type='number']").val(),
+                                    UnitRate: td4.children("input[type='number']").val(),
+                                    Amount: td5.children("input[type='number']").val()
+                                }
+                            )
+                        }
+                        if (tr.hasClass('RoadLine')) {
+                            var td1 = tr.find("td:eq(0)");
+                            var td2 = tr.find("td:eq(1)");
+                            var td3 = tr.find("td:eq(2)");
+                            var td4 = tr.find("td:eq(3)");
+                            var td5 = tr.find("td:eq(4)");
+                            data.push(
+                                {
+                                    ChargeId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].ChargeId"]').val(),
+                                    ShopId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].ShopId"]').val(),
+                                    ChargeMonth: td1.children('input[name="ChargeDetails[' + (i - 1) + '].ChargeMonth"]').val(),
+                                    FundInfoId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].FundInfoId"]').val(),
+                                    FundNameBN: td1.children('input[name="ChargeDetails[' + (i - 1) + '].FundNameBN"]').val(),
+                                    FundDetailId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].FundDetailId"]').val(),
+                                    Remark: td1.children('input[name="ChargeDetails[' + (i - 1) + '].Remark"]').val(),
+                                    StateStatus: td1.children('input[name="ChargeDetails[' + (i - 1) + '].StateStatus"]').val(),
+                                    ChargeName: td2.children('input[name="ChargeDetails[' + (i - 1) + '].ChargeName"]').val(),
+                                    PreviousReading: td1.children('input[name="ChargeDetails[' + (i - 1) + '].PreviousReading"]').val(),
+                                    CurrentReading: td1.children('input[name="ChargeDetails[' + (i - 1) + '].CurrentReading"]').val(),
+                                    ConsumUnit: td3.children("input[type='number']").val(),
+                                    UnitRate: td4.children("input[type='number']").val(),
+                                    Amount: td5.children("input[type='number']").val()
+                                }
+                            )
+                        }
+                        if (tr.hasClass('OthersData')) {
+                            var td1 = tr.find("td:eq(0)");
+                            var td2 = tr.find("td:eq(1)");
+                            var td3 = tr.find("td:eq(2)");
+                            data.push(
+                                {
+                                    ChargeId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].ChargeId"]').val(),
+                                    ShopId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].ShopId"]').val(),
+                                    ChargeMonth: td1.children('input[name="ChargeDetails[' + (i - 1) + '].ChargeMonth"]').val(),
+                                    FundInfoId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].FundInfoId"]').val(),
+                                    FundNameBN: td1.children('input[name="ChargeDetails[' + (i - 1) + '].FundNameBN"]').val(),
+                                    FundDetailId: td1.children('input[name="ChargeDetails[' + (i - 1) + '].FundDetailId"]').val(),
+                                    Remark: td1.children('input[name="ChargeDetails[' + (i - 1) + '].Remark"]').val(),
+                                    StateStatus: td1.children('input[name="ChargeDetails[' + (i - 1) + '].StateStatus"]').val(),
+                                    ChargeName: td2.children('input[name="ChargeDetails[' + (i - 1) + '].ChargeName"]').val(),
+                                    PreviousReading: td1.children('input[name="ChargeDetails[' + (i - 1) + '].PreviousReading"]').val(),
+                                    CurrentReading: td1.children('input[name="ChargeDetails[' + (i - 1) + '].CurrentReading"]').val(),
+                                    ConsumUnit: td1.children('input[name="ChargeDetails[' + (i - 1) + '].ConsumUnit"]').val(),
+                                    UnitRate: td1.children('input[name="ChargeDetails[' + (i - 1) + '].UnitRate"]').val(),
+                                    Amount: td3.children("input[type='number']").val()
+                                }
+                            )
+                        }
+                    }
+                    console.log(data);
+                    data = JSON.stringify(data);
+                    console.log(data);
+                    //return;
+                    $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Organization/SaveShopMonthlyChargesNew', data, getToken())).then(function (res, status) {
+                        if (res == true) {
+                            message("#msg1");
+                            alert(execuStatus.successSave);
+                            $("#ChargeBillingView").empty();
+                            $("#modalShowCharge").modal('toggle');
+                            LoadShop();
+                        }
+                        enable("#btnSubmit");
+                    }).fail(function (error) {
+                        alert(execuStatus.fail);
+                        console.log(error);
+                    })
+                    enable("#btnSubmit");
+                };
+            }
+        })
+    </script>
+}
+

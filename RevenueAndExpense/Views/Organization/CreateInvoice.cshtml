@@ -1,0 +1,452 @@
+﻿
+<div class="row">
+    <div class="col-md-12 text-center">
+        <a href="/Organization/GetInvoiceList" class="btn btn-primary float-left" title="লিস্টে ফিরে যান"><i class="fas fa-arrow-left"></i></a>
+        <h4 class="text-center">শপের মাসিক বিল আদায়</h4>
+        <hr />
+    </div>
+    <div class="col-md-12">
+        @Html.AntiForgeryToken()
+        <div class="form-row">
+            <div class="form-group col-md-3">
+                <label class="control-label" for="ddlFloor">ফ্লোরঃ</label>
+                @Html.DropDownList("ddlFloor", (IEnumerable<SelectListItem>)ViewBag.FloorList, "সিলেক্ট ফ্লোর", new { @class = "form-control" })
+            </div>
+            <div class="form-group col-md-3">
+                <label class="control-label" for="ddlHolding">হোল্ডিংঃ</label>
+                <select id="ddlHolding" class="form-control">
+                    <option value="">সিলেক্ট হোল্ডিং</option>
+                </select>
+            </div>
+            <div class="form-group col-md-4">
+                <label class="control-label" for="ddlDueYearMonth">বকেয়া মাসঃ</label>
+                <select id="ddlDueYearMonth" class="form-control">
+                    <option value="">সিলেক্ট বকেয়া মাস</option>
+                </select>
+            </div>
+            <div class="form-group col-md-2">
+                <label class="control-label" style="visibility:hidden">Add New</label>
+                <div>
+                    <a href="#" class="btn btn-warning" id="btnBill"><i class="fa fa-plus"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                <table class="table table-sm table-bordered table-responsive-lg" id="tblBillData">
+                    <thead class="text-center">
+                        <tr>
+                            <th colspan="4">
+                                <button type="button" class="btn btn-danger float-left" id="btnClear">বাতিল করুন</button>
+                            </th>
+                            <th colspan="6">
+                                <button type="button" class="btn btn-success float-right" id="btnSubmit"> সেভ করুন </button>
+                            </th>
+                        </tr>
+                        <tr class="btn-info ">
+                            <th>SL</th>
+                            <th class="hide"></th>
+                            <th class="hide">ShopId</th>
+                            <th class="hide">Month</th>
+                            <th class="hide">Year</th>
+                            <th>শপের নাম</th>
+                            <th>মাস</th>
+                            <th>টোটাল চার্জ</th>
+                            <th>বিদ্যুৎ বিল</th>
+                            <th>জরিমানা</th>
+                            <th>সংযোগ ফি</th>
+                            <th>মোট টাকা</th>
+                            <th class="hide penalty"></th>
+                            <th class="hide con"></th>
+                            @if (User.RoleName == "User Admin" || User.RoleName == "System Admin")
+                            {
+                                <th>মওকুফ</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot class="btn-light">
+                        <tr class="font-weight-bold">
+                            <td colspan="3" align="right">
+                                মোটঃ
+                            </td>
+                            <td align="right">
+                                <label id="totalCharge" data-val="0">
+                                    0
+                                </label>
+                            </td>
+                            <td align="right">
+                                <label id="totalElec" data-val="0">
+                                    0
+                                </label>
+                            </td>
+                            <td align="right">
+                                <label id="totalFine" data-val="0">
+                                    0
+                                </label>
+                            </td>
+                            <td align="right">
+                                <label id="totalConFee" data-val="0">
+                                    0
+                                </label>
+                            </td>
+                            <td align="right">
+                                <label id="totalAmount" data-val="0">
+                                    0
+                                </label>
+                            </td>
+                            <td class="hide pena"></td>
+                            @if (User.RoleName == "User Admin" || User.RoleName == "System Admin")
+                            {
+                                <td></td>
+                            }
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalPenalty" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header alert-success">
+                <h4 id="modalHeading" class="modal-title">জরিমানা মওকুফ</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="frmFloor">
+                    <input type="hidden" name="Id" id="hdfRowId" />
+                    <input type="hidden" name="Id" id="hdfPenaltyAmt" />
+                    <input type="hidden" name="Id" id="hdfConnectionAmt" />
+                    @Html.AntiForgeryToken()
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="txtPenalty" class="control-label font-weight-bold">জরিমানা <span id="actualPenaltyAmt"></span> </label>
+                            <input type="number" name="penalty" value="" id="txtPenalty" class="form-control" />
+                            <span class="error hide chkpenaltyAmt">জরিমানার পরিমাণ, প্রকৃত জরিমানা চেয়ে বেশী</span>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label for="txtReCon" class="control-label font-weight-bold">সংযোগ ফী <span id="actualReConAmt"></span> </label>
+                            <input type="number" name="Recon" value="" id="txtReCon" class="form-control" />
+                            <span class="error hide chkReConAmt">সংযোগ ফী পরিমাণ, প্রকৃত সংযোগ ফী চেয়ে বেশী</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer btn-light">
+                <button type="submit" class="btn btn-success float-right" id="btnUpdatePenalty"><i class="fas fa-save"></i> সেভ করুন </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+
+        var ddlFloor = $("#ddlFloor");
+        var ddlHolding = $("#ddlHolding");
+        var ddlDueYearMonth = $("#ddlDueYearMonth");
+
+        ddlFloor.change(function () {
+            clearDropdown("ddlHolding");
+            clearDropdown("ddlDueYearMonth");
+            clearCtrl();
+            if (ddlFloor.val() != "") {
+                LoadDropDown('/Common/GetHoldingsByFloorIdForDDL', 'POST', ddlHolding, JSON.stringify({ FloorId: ddlFloor.val() }));
+            }
+        })
+
+        ddlHolding.change(function () {
+            clearDropdown("ddlDueYearMonth");
+            clearCtrl();
+            if (ddlHolding.val() != "") {
+                LoadDropDown('/Common/GetYearAndMonthByHoldingId', 'POST', ddlDueYearMonth, JSON.stringify({ holding: ddlHolding.val() }));
+            }
+        })
+
+        function refreshFooter() {
+            $("#totalCharge").text('0')
+            $("#totalElec").text('0')
+            $("#totalFine").text('0')
+            $("#totalConFee").text('0')
+            $("#totalAmount").text('0')
+        }
+
+        function checkTableRows() {
+            var isValid = true
+            var i = $("#ddlDueYearMonth option:selected").index();
+            if ($("#ddlDueYearMonth option").length == $("#tblBillData tbody").length) {
+                isValid = false;
+            }
+            var trLength = $("#tblBillData tbody tr").length;
+            if (i > 1) {
+
+                if (trLength >= 1) {
+                    if ($("#tblBillData tbody").children('tr').eq(trLength - 1).find('td').eq(1).html() != (i - 1).toString()) {
+                        isValid = false;
+                    }
+                }
+                else {
+                    isValid = false;
+                }
+            } else {
+                if (i == 1 && trLength == 1) {
+                    if ($("#tblBillData tbody").children('tr').eq(trLength - 1).find('td').eq(1).html() == (i).toString()) {
+                        isValid = false;
+                    }
+                }
+
+            }
+
+            return isValid;
+        }
+
+
+        function validateInput() {
+            var isValid = true;
+            var count = $("#tblBillData tbody tr").length;
+            if (count > 0) {
+                $.each($("#tblBillData tbody tr"), function (index, item) {
+                    var month = $(this).children('td').eq(15).html();
+                    if (month == ddlDueYearMonth.val()) {
+                        isValid = false;
+                    }
+                })
+            }
+            return isValid;
+        }
+
+        $("#btnBill").click(function (e) {
+            e.preventDefault();
+            if (ddlFloor.val() != "" && ddlHolding.val() != "" && ddlDueYearMonth.val() != "" && checkTableRows() === true && validateInput() === true) {
+                disable("#btnBill");
+                var data = JSON.stringify({ floorId: ddlFloor.val(), holdingId: ddlHolding.val(), key: ddlDueYearMonth.val() });
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Organization/GetBillAmountData', data, getToken())).then(function (res, status) {
+                    console.log(status);
+                    console.log(res);
+                    if (status == "success") {
+                        bindDataToTable(res);
+                    }
+                }).fail(function (error) {
+                    consoleLog(error);
+                })
+                enable("#btnBill");
+            }
+        })
+
+
+        function bindDataToTable(objData) {
+            var sl = $("#tblBillData tbody tr").length == 0 ? 1 : ($("#tblBillData tbody tr").length + 1);
+            if (objData.ShopId != 0) {
+                var td1 = "<td class='text-center'>" + sl + "</td>";
+                var td2 = "<td class='hide'>" + $("#ddlDueYearMonth option:selected").index() + "</td>"
+                var td3 = "<td class='hide'>" + objData.ShopId + "</td>";
+                var td4 = "<td class='hide'>" + objData.Month + "</td>";
+                var td5 = "<td class='hide'>" + objData.Year + "</td>";
+                var td6 = "<td>" + objData.ShopName + "</td>";
+                var td7 = "<td>" + objData.BillMonth + "</td>";
+                var td8 = "<td dataval='" + objData.TotalAmount + "' align='right'>" + objData.TotalAmountBN + "</td>";
+                var td9 = "<td dataval='" + objData.CurrentBill + "' align='right'>" + objData.CurrentBillBN + "</td>";
+                var td10 = "<td dataval='" + objData.Fine + "' align='right'>" + objData.FineBN + "</td>";
+                var td11 = "<td dataval='" + objData.ConnectionFee + "' align='right'>" + objData.ConnectionFeeBN + "</td>";
+                var td12 = "<td dataval='" + objData.TotalAmountFC + "' align='right'>" + objData.TotalAmountFCBN + "</td>";
+                var td13 = "<td class='hide'>" + objData.Fine + "</td>";
+                var td14 = "<td class='hide'>" + objData.ConnectionFee + "</td>";
+                var td15 = '';
+                var td16 = "<td class='hide'>" + ddlDueYearMonth.val() + "</td>";
+                if ('@User.RoleName' == "User Admin" || '@User.RoleName' == "System Admin") {
+                    td15 = "<td class='text-center'><a href='#' class='btn btn-sm btn-primary btnPenalty'><i class='fas fa-pen' ></i ></a ></td >";
+                }
+                var tr = "<tr class='font-weight-bold'>" + td1 + td2 + td3 + td4 + td5 + td6 + td7 + td8 + td9 + td10 + td11 + td12 + td13 + td14 + td15 + td16 + "</tr>";
+                $("#tblBillData tbody").append(tr);
+                if (sl > 0) {
+                    calculateTotal();
+                }
+            }
+        }
+
+        function calculateTotal() {
+            if ($("#tblBillData tbody tr").length > 0) {
+                var totalCharge = 0;
+                var totalElec = 0;
+                var totalFine = 0;
+                var totalConFee = 0;
+                var totalAmount = 0;
+
+                $.each($("#tblBillData tbody tr"), function (index, item) {
+                    totalCharge += TryParseFloat($(this).children('td').eq(7).attr('dataval'), 0);
+                    totalElec += TryParseFloat($(this).children('td').eq(8).attr('dataval'), 0);
+                    totalFine += TryParseFloat($(this).children('td').eq(9).attr('dataval'), 0);
+                    totalConFee += TryParseFloat($(this).children('td').eq(10).attr('dataval'), 0);
+                    totalAmount += TryParseFloat($(this).children('td').eq(11).attr('dataval'), 0);
+                    consoleLog("totalCharge " + totalCharge + " totalElec " + totalElec + " totalFine " + totalFine + " totalConFee " + totalConFee + " totalAmount " + totalAmount);
+                })
+
+                $("#totalCharge").text(fnConvertEnNumToBnNum(totalCharge.toString()));
+                $("#totalElec").text(fnConvertEnNumToBnNum(totalElec.toString()));
+                $("#totalFine").text(fnConvertEnNumToBnNum(totalFine.toString()));
+                $("#totalConFee").text(fnConvertEnNumToBnNum(totalConFee.toString()));
+                $("#totalAmount").text(fnConvertEnNumToBnNum(totalAmount.toString()));
+
+                $("#totalCharge").attr("data-val", totalCharge);
+                $("#totalElec").attr("data-val", totalElec);
+                $("#totalFine").attr("data-val", totalFine);
+                $("#totalConFee").attr("data-val", totalConFee);
+                $("#totalAmount").attr("data-val", totalAmount);
+            }
+        }
+
+        $("#btnSubmit").click(function (e) {
+            e.preventDefault();
+            if (ddlFloor.val() != "" && ddlHolding.val() != "" && ddlDueYearMonth.val() != "" && $("#tblBillData tbody tr").length > 0) {
+
+                disable("#btnSubmit");
+                var shopid = $("#tblBillData tbody tr").eq(0).children('td').eq(2).text();
+                var info = { Id: 0, FloorId: ddlFloor.val(), HoldingId: ddlHolding.val(), ShopId: shopid, TotalFineAmount: $("#totalFine").attr("data-val"), TotalConnectionFee: $("#totalConFee").attr("data-val"), TotalChargeAmount: $("#totalCharge").attr("data-val"), TotalAmount: $("#totalAmount").attr("data-val"), TotalFineAmountBN: $("#totalFine").text(), TotalConnectionFeeBN: $("#totalConFee").text(), TotalChargeAmountBN: $("#totalCharge").text(), TotalAmountBN: $("#totalAmount").text() };
+
+                var details = [];
+                details.length = 0;
+
+                $.each($("#tblBillData tbody tr"), function (index, item) {
+                    var child = $(this).children('td');
+                    var shopid = child.eq(2).text();
+                    var month = child.eq(3).text();
+                    var year = child.eq(4).text();
+                    var chargeAmount = child.eq(7).attr("dataval");
+                    var chargeAmountBN = child.eq(7).text();
+                    var fine = child.eq(9).attr("dataval");
+                    var fineBN = child.eq(9).text();
+                    var conFee = child.eq(10).attr("dataval");
+                    var conFeeBN = child.eq(10).text();
+                    var netAmt = child.eq(11).attr("dataval");
+                    var netAmtBN = child.eq(11).text();
+                    details.push({
+                        Id: 0,
+                        ShopId: shopid,
+                        Month: month,
+                        Year: year,
+                        ChargeAmount: chargeAmount,
+                        FineAmount: fine,
+                        ConnectionFee: conFee,
+                        NetAmount: netAmt,
+                        ChargeAmountBN: chargeAmountBN,
+                        FineAmountBN: fineBN,
+                        ConnectionFeeBN: conFeeBN,
+                        NetAmountBN: netAmtBN
+                    })
+                })
+                var data = JSON.stringify({ info: info, details: details });
+                console.log(data);
+                //return console.log(data);
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Organization/SaveInvoice', data, getToken())).then(function (res, status) {
+                    if (res.isSuccess == true) {
+                        clearDropdown("ddlDueYearMonth");
+                        $("#tblBillData tbody").empty();
+                        refreshFooter();
+                        alert("ডাটা সফলভাবে সেভ হয়েছে...।");
+
+                        var pdfWindow = window.open("", "_blank")
+                        pdfWindow.document.write("<embed width='100%' height='100%' src='" + encodeURI(res.report) + "'></embed>");
+                        download(res.report, "Invoice", "application/pdf");
+                    }
+                    enable("#btnSubmit");
+                }).fail(function (error) {
+                    consoleLog(error);
+                })
+                enable("#btnSubmit");
+            }
+        })
+
+        function clearCtrl() {
+            $("#tblBillData tbody").empty();
+            refreshFooter();
+        }
+
+        $("#btnClear").click(function (e) {
+            e.preventDefault();
+            clearCtrl();
+    })
+
+    //
+    $(document).on('click', '.btnPenalty', function (e) {
+        e.preventDefault();
+        //data_toggle='modal', data_target='#modalPenalty'
+        $("#hdfRowId").val('');
+        $("#hdfPenaltyAmt").val('0');
+        $("#hdfConnectionAmt").val('0');
+
+        $("#txtPenalty").val('');
+        $("#actualPenaltyAmt").text('');
+        $("#modalPenalty").modal("show");
+        var rowId = $(this).parent().parents('tr').index();
+        var penaltyFee = $(this).parent().parents('tr').children('td').eq(12).html();
+        var reConFee = $(this).parent().parents('tr').children('td').eq(13).html();
+        $("#hdfRowId").val(rowId);
+        $("#hdfPenaltyAmt").val(penaltyFee);
+        $("#hdfConnectionAmt").val(reConFee);
+
+        $("#actualPenaltyAmt").text(' (' + fnConvertEnNumToBnNum(penaltyFee) + ')');
+        var PenaltyAmt = $(this).parent().parents('tr').children('td').eq(9).attr("dataval");
+        $("#txtPenalty").val(PenaltyAmt);
+        console.log(PenaltyAmt);
+
+        //actualReConAmt
+        //txtReCon
+        //chkReConAmt
+        $("#actualReConAmt").text(' (' + fnConvertEnNumToBnNum(reConFee) + ')');
+        var reConAmt = $(this).parent().parents('tr').children('td').eq(10).attr("dataval");
+        $("#txtReCon").val(reConAmt);
+       //var amt= fnConvertBnNumToEnNum(PenaltyAmt.toString());
+        //console.log("fnConvertEnNumToBnNum");
+        //console.log(fnConvertEnNumToBnNum(PenaltyAmt));
+
+        })
+
+        function validatePenaltyAmt() {
+            var isValid = true;
+            $(".error").addClass('hide');
+            //console.log("Actual Penalty Amount= "+);
+            if (TryParseFloat($("#txtPenalty").val(), 0) > TryParseFloat($("#hdfPenaltyAmt").val(),0)) {
+                isValid = false;
+                $(".chkpenaltyAmt").removeClass('hide');
+            }
+            if (TryParseFloat($("#txtReCon").val(), 0) > TryParseFloat($("#hdfConnectionAmt").val(), 0)) {
+                isValid = false;
+                $(".chkReConAmt").removeClass('hide');
+            }
+            return isValid;
+        }
+
+        $("#btnUpdatePenalty").click(function (e) {
+            e.preventDefault();
+            if (validatePenaltyAmt()) {
+                $("#modalPenalty").modal("toggle");
+                var penaltyAmt = TryParseFloat($("#txtPenalty").val(), 0) <= 0 ? 0 : TryParseFloat($("#txtPenalty").val(), 0);
+                var reConAmt = TryParseFloat($("#txtReCon").val(), 0) <= 0 ? 0 : TryParseFloat($("#txtReCon").val(), 0);
+                //var td8 = "<td dataval='" + objData.TotalAmount + "' align='right'>" + objData.TotalAmountBN + "</td>";
+                //var td9 = "<td dataval='" + objData.CurrentBill + "' align='right'>" + objData.CurrentBillBN + "</td>";
+                var totalAmt = $("#tblBillData tbody").children("tr").eq($("#hdfRowId").val()).children('td').eq(7).attr("dataval");
+                //var totalCurrentBill = $("#tblBillData tbody").children("tr").eq($("#hdfRowId").val()).children('td').eq(8).attr("dataval");
+                console.log("TotalAmt:="+totalAmt.toString());
+                var total = TryParseInt(totalAmt, 0) + penaltyAmt + reConAmt;
+                console.log("total:=" + total.toString());
+                $("#tblBillData tbody").children("tr").eq($("#hdfRowId").val()).children('td').eq(9).attr("dataval", penaltyAmt);
+                $("#tblBillData tbody").children("tr").eq($("#hdfRowId").val()).children('td').eq(9).html(fnConvertEnNumToBnNum(penaltyAmt.toString()));
+                $("#tblBillData tbody").children("tr").eq($("#hdfRowId").val()).children('td').eq(10).attr("dataval", reConAmt);
+                $("#tblBillData tbody").children("tr").eq($("#hdfRowId").val()).children('td').eq(10).html(fnConvertEnNumToBnNum(reConAmt.toString()));
+                $("#tblBillData tbody").children("tr").eq($("#hdfRowId").val()).children('td').eq(11).attr("dataval", total);
+                $("#tblBillData tbody").children("tr").eq($("#hdfRowId").val()).children('td').eq(11).html(fnConvertEnNumToBnNum(total.toString()));
+                $("#hdfRowId").val('');
+                $("#hdfPenaltyAmt").val('0');
+                $("#txtPenalty").val('');
+                $("#actualPenaltyAmt").text('');
+
+                $("#hdfConnectionAmt").val('0');
+                $("#txtReCon").val('');
+                $("#actualReConAmt").text('');
+                calculateTotal();
+            }
+        })
+    </script>
+}

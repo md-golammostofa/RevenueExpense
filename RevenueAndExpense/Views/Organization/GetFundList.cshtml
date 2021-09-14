@@ -1,0 +1,217 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ViewModels.VmFund>
+
+@{
+    ViewBag.Title = "List of Fund";
+    int slNo = 0;
+}
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h4>ফান্ডের তালিকা</h4>
+        <hr />
+    </div>
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-4">
+                <input type="text" name="search" id="searchBy" class="form-control form-control-sm" placeholder="যেকোন কিছু দিয়ে সার্চ করুন" onkeyup="tableFilter('#tblFundInfoData tbody tr',this)" />
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <button class="btn btn-primary float-lg-right" id="btnAddNew"><i class="fa fa-plus"></i> নতুন ফান্ড তৈরি করুন</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12" style="margin-top:5px">
+        <table class="table table-bordered table-hover table-sm table-responsive-lg" id="tblFundInfoData">
+            <thead class="btn-info text-center">
+                <tr>
+                    <th class="hide"></th>
+                    <th>SL No.</th>
+                    <th>ফান্ডের নাম (ইংরেজি)</th>
+                    <th>ফান্ডের নাম (বাংলা)</th>
+                    <th>মন্তব্য</th>
+                    <th class="hide"></th>
+                    <th>প্রতিষ্ঠান</th>
+                    <th>এন্ট্রি ইউজার</th>
+                    <th>অ্যাকশান</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    slNo = slNo + 1;
+                    <tr>
+                        <td class="hide">@item.FundInfoId</td>
+                        <td class="text-center" style="width:7%">@slNo</td>
+                        <td>@item.FundName</td>
+                        <td>@item.FundNameBN</td>
+                        <td>@item.Remarks</td>
+                        <td>@item.OrganizationName</td>
+                        <td>@item.EntryUser</td>
+                        <td class="text-center" style="width:25%">
+                            <a href="#" class="btn btn-icon btn-warning data-edit-fundInfo" data-edit-item="@item.FundInfoId"><i class="far fa-edit"></i> এডিট </a>
+                            <a href="#" class="btn btn-icon btn-danger data-del-fundInfo hide" data-del-item="@item.FundInfoId"><i class="fas fa-times"></i> ডিলেট </a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count() == 0)
+                {
+                    <tr class="text-center">
+                        <td colspan="8">No Data Found..</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalFundInfo" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header alert-success">
+                <h4 id="modalHeading" class="modal-title"><span id="spanModalhead">নতুন ফান্ড তৈরি করুন</span></h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="frmFloor">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" id="hdfFundInfoId" />
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="txtFundName" class="control-label font-weight-bold">ফান্ডের নাম(ইংরেজি)</label>
+                            <input type="text" name="" value="" id="txtFundName" class="form-control" maxlength="100"/>
+                            <span class="error hide duplicate-fundName">এই নামে ইতিমধ্যে ফান্ড আছে</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="txtFundName" class="control-label font-weight-bold">ফান্ডের নাম(বাংলা)</label>
+                            <input type="text" name="" value="" id="txtFundNameBN" class="form-control" maxlength="100"/>
+                            <span class="error hide required-fundNameBN">ফান্ডের নাম আবশ্যক</span>
+                            <span class="error hide duplicate-fundNameBN">এই নামে ইতিমধ্যে ফান্ড আছে</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="txtRemarks" class="control-label font-weight-bold">মন্তব্যঃ</label>
+                            <textarea type="" name="remarks" id="txtRemarks" class="form-control" cols="20" rows="2" maxlength="100"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer btn-light">
+                <div class="col-md-4">
+                    <div id="msg1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে সেভ হয়েছে।
+                    </div>
+                    <div id="msg2" class="alert alert-danger hide float-left">
+                        ডাটা সেভ হতে ব্যর্থ হয়েছে।
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success float-right" id="btnSubmit"><i class="fas fa-save"></i> <span id="spanSaveText">সেভ করুন</span> </button>
+                <button type="button" class="btn btn-danger float-right" data-dismiss="modal" data-target="#"><i class="fas fa-times"></i> বাতিল করুন </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        var txtFundName = $("#txtFundName");
+        var txtFundNameBN = $("#txtFundNameBN");
+        var txtRemarks = $("#txtRemarks");
+        var hdfFundInfoId = $("#hdfFundInfoId");
+
+        function OpenModal() {
+            clearControl();
+            $("#spanModalhead").text('নতুন ফান্ড তৈরি করুন')
+            $("#spanSaveText").text("সেভ করুন");
+//            $("#spanSaveText").text("আপডেট করুন");
+            $("#btnSubmit")
+            $("#modalFundInfo").modal("show");
+        }
+
+        $("#btnAddNew").click(function (e) {
+            e.preventDefault();
+            OpenModal();
+        })
+
+        function clearControl() {
+            txtFundName.val('');
+            txtFundNameBN.val('');
+            txtRemarks.val('');
+        }
+
+        function validateForm() {
+            var isvalid = true;
+            $(".error").addClass("hide");
+            var id = TryParseInt(hdfFundInfoId.val(), 0);
+            if (txtFundNameBN.val().trim() == '')
+            {
+                $(".required-fundNameBN").removeClass("hide");
+                isvalid = false;
+            }
+            else{
+                
+                var data = JSON.stringify({ fundId: id, fundNameBN: txtFundNameBN.val().trim() });
+                if (ajaxBooleanChecker(data, '/Common/IsFundInfoBNExistByFundInfoId', getToken()) == true){
+                    $(".duplicate-fundNameBN").removeClass("hide");
+                    isvalid = false;
+                }
+            }
+
+            if (txtFundName.val().trim() != '')
+            {
+                var data = JSON.stringify({ fundId: id, fundNameEN: txtFundName.val().trim() });
+                if (ajaxBooleanChecker(data, '/Common/IsFundInfoENExistByFundInfoId', getToken()) == true) {
+                    $(".duplicate-fundName").removeClass("hide");
+                    isvalid = false;
+                }
+            }
+            return isvalid; 
+        }
+
+        $("#btnSubmit").click(function (e) {
+            e.preventDefault();
+            if (validateForm() == true)
+            {
+                disable("#btnSubmit");
+                var id = TryParseInt(hdfFundInfoId.val(), 0);
+                var data = JSON.stringify({ FundInfoId: id, FundName: txtFundName.val().trim(), FundNameBN: txtFundNameBN.val(), Remarks:txtRemarks.val() });
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Organization/SaveFundInfo', data,getToken())).then(function (res, status) {
+                    console.log(res);
+                    console.log(status);
+                    if (res == true) {
+                        message("#msg1", "#modalFundInfo");
+                    } else {
+                        message("#msg2");
+                    }
+                    enable("#btnSubmit");
+                }).fail(function (error) {
+                    console.log(error);
+                    enable("#btnSubmit");
+                    message("#msg2");
+                })
+            }
+        })
+        
+        $(document).on("click", "a.data-edit-fundInfo", function (e) {
+            e.preventDefault();
+            var id = $(this).attr("data-edit-item");
+            var data = JSON.stringify({ Id: id });            
+            $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Organization/GetFundInfoById', data, getToken())).then(function (res, status) {
+                console.log(res);
+                console.log(status);
+                if (res !=null) {
+                    OpenModal();
+                    $("#spanModalhead").text('ফান্ড আপডেট করুন')
+                    $("#spanSaveText").text("আপডেট করুন");
+                    txtFundName.val(res.FundName);
+                    txtFundNameBN.val(res.FundNameBN);
+                    txtRemarks.val(res.Remarks);
+                    hdfFundInfoId.val(res.FundInfoId);
+                } 
+            }).fail(function (error) {
+                console.log(error);
+                alert(execuStatus.fail);
+            })
+        })
+    </script>
+}
+

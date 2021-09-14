@@ -1,0 +1,60 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ViewModels.VmShop>
+@{
+    int sl = 0;
+    string state = string.Empty;
+    Layout = null;
+}
+<table class="table table-bordered table-hover table-sm table-responsive-lg" id="tblFloorData">
+    <thead class="btn-info text-center">
+        <tr>
+            <th class="hide"></th>
+            <th>SL No.</th>
+            <th>দোকানের নাম</th>
+            <th>মালিকের নাম</th>
+            <th style="vertical-align:middle">মোবাইল নং</th>
+            <th class="hide"></th>
+            <th style="vertical-align:middle">ফ্লোরের নং</th>
+            <th style="vertical-align:middle">হোল্ডিং নং</th>
+            <th style="vertical-align:middle">অবস্থা</th>
+            <th style="vertical-align:middle">এন্ট্রি ইউজার</th>
+            <th style="vertical-align:middle">অ্যাকশান</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            sl = sl + 1;
+            if (item.StateStatus == "Active")
+            {
+                state = "চালু আছে";
+            }
+            else if (item.StateStatus == "Inactive")
+            {
+                state = "বন্ধ আছে";
+            }
+            <tr>
+                <td class="hide">@item.ShopId</td>
+                <td class="text-center" style="width:7%">@sl</td>
+                <td>@item.ShopName</td>
+                <td>@item.ProprietorName</td>
+                <td>@item.MobileNo</td>
+                <td class="hide">@item.FloorId</td>
+                <td>@item.FloorName</td>
+                <td>@item.HoldingNo</td>
+                <td>@state</td>
+                <td>@item.EntryUser</td>
+                <td class="text-center" style="width:25%">
+                    @Ajax.ActionLink("চার্জ সমূহ", "GetChargesByShopId", "Organization", new { shopid = item.ShopId }, new AjaxOptions { InsertionMode = InsertionMode.Replace, UpdateTargetId = "ViewShopCharges", HttpMethod = "POST" }, new { @class = "btn btn-info btn-sm btn-charges", data_toggle = "modal", data_target = "#exampleModalCenter" })
+                    <a href="/Organization/CreateShop?shopid=@item.ShopId&floorid=@item.FloorId" class="btn btn-icon btn-sm btn-warning data-edit-shop" data-edit-item="@item.ShopId" data-floor-item="@item.FloorId"><i class="far fa-edit"></i> এডিট</a>
+                    <a href="/Organization/CreateShop?shopid=@item.ShopId&floorid=@item.FloorId" class="btn btn-icon btn-sm btn-danger data-del-shop" data-del-item="@item.ShopId" data-floor-item="@item.FloorId"><i class="fas fa-times"></i> ডিলেট</a>
+                </td>
+            </tr>
+        }
+        @if (Model.Count() == 0)
+        {
+            <tr class="text-center empty-row">
+                <td colspan="9">No Data Found..</td>
+            </tr>
+        }
+    </tbody>
+</table>

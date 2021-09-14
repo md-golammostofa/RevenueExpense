@@ -1,0 +1,49 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ViewModels.VmShop>
+@{
+    string status = string.Empty;
+}
+
+<table class="table table-sm table-bordered table-responsive-lg">
+    <thead class="btn-info">
+        <tr class="text-center">
+            <th class="hide"></th>
+            <th>শপের নাম</th>
+            <th>মালিকের নামে</th>
+            <th>মোবাইল</th>
+            <th class="hide"></th>
+            <th>ফ্লোর</th>
+            <th>স্ট্যাটাস</th>
+            <th>হোল্ডিং</th>
+            <th class="hide"></th>
+            <th class="hide"></th>
+            <th>অ্যাকশান</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            status = @item.StateStatus == "Active" ? "সচল আছে" : "বন্ধ আছে";
+            <tr>
+                <td class="hide">@item.ShopId</td>
+                <td>@item.ShopName</td>
+                <td>@item.ProprietorName</td>
+                <td>@item.MobileNo</td>
+                <td class="hide">@item.FloorId</td>
+                <td class="text-center">@item.FloorName</td>
+                <td class="text-center">@status</td>
+                <td>@item.HoldingNo</td>
+                <td class="hide">@item.Month</td>
+                <td class="hide">@item.Year</td>
+                <td class="text-center">
+                    <a href="#" class="btn btn-icon btn-sm btn-primary data-monthly-charge-item" data-monthly-charge-item="@item.ShopId">চার্জ তৈরি করুন</a>
+                </td>
+            </tr>
+        }
+        @if (Model.Count() == 0)
+        {
+            <tr class="text-center">
+                <td colspan="12">কোন ডাটা পাওয়া যায়নি...</td>
+            </tr>
+        }
+    </tbody>
+</table>

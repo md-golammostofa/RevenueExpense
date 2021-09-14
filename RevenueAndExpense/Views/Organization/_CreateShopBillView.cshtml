@@ -1,0 +1,110 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ViewModels.VmShopMonthlyChargeDetails>
+@{
+    int index = 0;
+}
+<table class="table table-bordered table-responsive-lg">
+    @foreach (var item in Model)
+    {
+        if (item.Remark == "Electricity")
+        {
+            <tr class="btn-info">
+                <td class="hide"></td>
+                <td>চার্জের নাম</td>
+                <td>পূর্বের রিডিং</td>
+                <td>বর্তমান রিডিং</td>
+                <td>ব্যবহিত ইউনিট</td>
+                <td>ইউনিট রেট</td>
+                <td>টাকার পরিমাণ</td>
+            </tr>
+            <tr class="btn-info">
+                <td class="hide">
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].ChargeId", index), item.ChargeId)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].ShopId", index), item.ShopId)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].ChargeMonth", index), item.ChargeMonth)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].FundInfoId", index), item.FundInfoId)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].FundNameBN", index), item.FundNameBN)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].FundDetailId", index), item.FundDetailId)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].Remark", index), item.Remark)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].StateStatus", index), item.StateStatus)
+                </td>
+                <td>
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].ChargeName", index), item.ChargeName)
+                    @item.ChargeName
+                </td>
+                <td>
+                    @Html.TextBox(string.Format("ChargeDetails[{0}].PreviousReading", index), item.PreviousReading, new { @class = "form-control form-control-sm form-keyup prev-unit " + @item.Remark, @type = "number" })
+                </td>
+                <td>
+                    @Html.TextBox(string.Format("ChargeDetails[{0}].CurrentReading", index), item.CurrentReading, new { @class = "form-control form-control-sm form-keyup curr-unit " + @item.Remark, @type = "number" })
+                </td>
+                <td>
+                    @Html.TextBox(string.Format("ChargeDetails[{0}].ConsumUnit", index), item.ConsumUnit, new { @class = "form-control form-control-sm ", @type = "number" })
+                </td>
+                <td>
+                    @Html.TextBox(string.Format("ChargeDetails[{0}].UnitRate", index), item.UnitRate, new { @class = "form-control form-control-sm form-keyup elec-rate " + @item.Remark, @type = "number" })
+                </td>
+                <td>
+                    @Html.TextBox(string.Format("ChargeDetails[{0}].Amount", index), item.Amount, new { @class = "form-control form-control-sm", @type = "number" })
+                </td>
+            </tr>
+        }
+        else if (item.Remark == "Fan")
+        {
+            <tr class="btn-success">
+                <td class="hide">
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].ChargeId", index), item.ChargeId)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].ShopId", index), item.ShopId)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].ChargeMonth", index), item.ChargeMonth)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].FundInfoId", index), item.FundInfoId)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].FundNameBN", index), item.FundNameBN)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].FundDetailId", index), item.FundDetailId)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].Remark", index), item.Remark)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].PreviousReading", index), item.PreviousReading)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].CurrentReading", index), item.CurrentReading)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].StateStatus", index), item.StateStatus)
+                </td>
+                <td colspan="3">
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].ChargeName", index), item.ChargeName)
+                    @item.ChargeName
+                </td>
+                <td>
+                    @Html.TextBox(string.Format("ChargeDetails[{0}].ConsumUnit", index), item.ConsumUnit, new { @class = "form-control form-control-sm form-keyup fan-consum"+ @item.Remark, @type = "number" })
+                </td>
+                <td>
+                    @Html.TextBox(string.Format("ChargeDetails[{0}].UnitRate", index), item.UnitRate, new { @class = "form-control form-control-sm form-keyup fan-rate "+ @item.Remark, @type = "number" })
+                </td>
+                <td>
+                    @Html.TextBox(string.Format("ChargeDetails[{0}].Amount", index), item.Amount, new { @class = "form-control form-control-sm", @type = "number" })
+                </td>
+            </tr>
+        }
+        else if (item.Remark == "Others")
+        {
+            <tr class="btn-warning">
+                <td class="hide">
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].ChargeId", index), item.ChargeId)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].ShopId", index), item.ShopId)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].ChargeMonth", index), item.ChargeMonth)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].FundInfoId", index), item.FundInfoId)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].FundNameBN", index), item.FundNameBN)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].FundDetailId", index), item.FundDetailId)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].Remark", index), item.Remark)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].PreviousReading", index), item.PreviousReading)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].CurrentReading", index), item.CurrentReading)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].ConsumUnit", index), item.ConsumUnit)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].UnitRate", index), item.UnitRate)
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].StateStatus", index), item.StateStatus)
+                </td>
+                <td colspan="5">
+                    @Html.Hidden(string.Format("ChargeDetails[{0}].ChargeName", index), item.ChargeName)
+                    @item.ChargeName
+                </td>
+                <td>
+                    @Html.TextBox(string.Format("ChargeDetails[{0}].Amount", index), item.Amount, new { @class = "form-control form-control-sm", @type = "number"})
+                </td>
+            </tr>
+        }
+        index++;
+    }
+</table>
+

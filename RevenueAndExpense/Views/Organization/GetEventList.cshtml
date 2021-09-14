@@ -1,0 +1,340 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ViewModels.VmEventList>
+@{
+    ViewBag.Title = "List Of Event";
+    int sl = 0;
+}
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h4>ইভেন্ট চার্জ লিস্ট</h4>
+        <hr />
+    </div>
+    <div class="col-md-12 mb-2">
+        <div class="row">
+            <div class="col-md-5">
+                <input type="text" id="txtSearchByAnything" class="form-control" placeholder="যেকোন কিছু দিয়ে সার্চ করুন" onkeyup="tableFilter('#tblEventChargeList tbody tr',this)" />
+            </div>
+            <div class="col-md-4" style="visibility:hidden">
+                @Html.DropDownList("ddlMonthAndYear", (IEnumerable<SelectListItem>)ViewBag.MonthAndYear, "সিলেক্ট মাস ও সাল", new { @class = "form-control" })
+            </div>
+            <div class="col-md-3">
+                <button id="btnAddNew" class="btn btn-primary"> <b>+</b> ইভেন্ট তৈরি করুন</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <table class="table table-sm table-bordered table-responsive-lg" id="tblEventChargeList">
+            <thead class="btn-info">
+                <tr class="text-center">
+                    <th>SL No.</th>
+                    <th class="hide"></th>
+                    <th>ইভেন্টের নাম</th>
+                    <th>মাস ও সাল</th>
+                    <th>ফ্লোর</th>
+                    <th>ফান্ডের নাম</th>
+                    <th>সাব-ফান্ডের নাম</th>
+                    <th>টাকার পরিমান</th>
+                    <th>মন্ত্যব</th>
+                    <th>এন্ট্রি ইউজার</th>
+                    <th>অ্যাকশান</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    sl = sl + 1;
+                    <tr>
+                        <td class="text-center">@sl</td>
+                        <td class="hide">@item.EventInfoId</td>
+                        <td>@item.EventName</td>
+                        <td>@item.MonthAndYear</td>
+                        <td>@item.EventFloors</td>
+                        <td>@item.FundNameBN</td>
+                        <td>@item.FundDetailNameBN</td>
+                        <td>@item.AmountBN</td>
+                        <td>@item.Remarks</td>
+                        <td>@item.EntryUser</td>
+                        <td>
+                            <a href="#" class="btn btn-warning btn-sm data-edit-item" data-edit-item="@item.EventInfoId">এডিট</a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count() == 0)
+                {
+                    <tr class="text-center empty-row">
+                        <td colspan="10">কোন ডাটা পাওয়া যায়নি...।</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEvent" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header alert-success">
+                <h4 id="modalHeading" class="modal-title">নতুন ইভেন্ট চার্জ তৈরি করুন</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="frmEvent">
+                    <input type="hidden" name="Id" id="hdfEventId" />
+                    @Html.AntiForgeryToken()
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="txtEventName">ইভেন্টের নাম</label>
+                            <input type="text" id="txtEventName" class="form-control" />
+                            <span class="error hide require-eventName">ইভেন্টের নাম আবশ্যক</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="ddlMonthName">মাসঃ</label>
+                            @Html.DropDownList("ddlMonthName", (IEnumerable<SelectListItem>)ViewBag.MonthAndYear2, "সিলেক্ট মাস", new { @class = "form-control" })
+                            <span class="error hide require-MonthName">মাসের নাম আবশ্যক</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="ddlFundInfo">ফান্ড</label>
+                            @Html.DropDownList("ddlFundInfo", (IEnumerable<SelectListItem>)ViewBag.ddlFundInfo, "সিলেক্ট ফান্ড", new { @class = "form-control" })
+                            <span class="error hide require-fundName">ফান্ডের নাম আবশ্যক</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="ddlFundDetail">সাব-ফান্ড</label>
+                            <select class="form-control" id="ddlFundDetail">
+                                <option value="">সিলেক্ট সাব-ফান্ড</option>
+                            </select>
+                            <span class="error hide require-subFundName">সাব-ফান্ডের নাম আবশ্যক</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label font-weight-bold" for="txtAmount">টাকার পরিমাণ</label>
+                            <input type="number" id="txtAmount" value="" class="form-control" />
+                            <span class="error hide require-Amount">টাকার পরিমাণ আবশ্যক</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            @*<label class="control-label font-weight-bold" for="chkIsActive" style="visibility:hidden">Is Active?</label>
+                                <div class="form-control">
+                                    <input type="checkbox" id="chkIsActive" /> অ্যাক্টিভ?
+                                </div>*@
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-row col-md-6">
+                            <label class="control-label font-weight-bold" for="ddlFloors">ফ্লোর</label>
+                            <div class="input-group">
+                                @Html.DropDownList("ddlFloors", (IEnumerable<SelectListItem>)ViewBag.ddlFloor, "সিলেক্ট ফ্লোর", new { @class = "form-control" })
+                                <div>
+                                    <button class="btn btn-info" id="btnAddFloor"><i class="fa fa-plus"></i></button>
+                                </div>
+                            </div>
+                            <span class="error hide require-floors">ফ্লোর আবশ্যক</span>
+                        </div>
+                        <div class="form-row col-md-1">
+                        </div>
+                        <div class="form-row  col-md-5">
+                            <table class="table table-bordered table-sm table-responsive-lg" id="tblEventFloors">
+                                <thead class="btn-dark">
+                                    <tr class="text-center">
+                                        <th>SL No.</th>
+                                        <th class="hide"></th>
+                                        <th>ফ্লোর</th>
+                                        <th>অ্যাকশান</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                            <span class="error hide event-exist">আপনি ইতিমধ্যে ফ্লোরটি সংযুক্ত করেছেন</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-row col-md-12"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer btn-light">
+                <div class="col-md-4">
+                    <div id="msg1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে সেভ হয়েছে।
+                    </div>
+                    <div id="msg2" class="alert alert-danger hide float-left">
+                        ডাটা সেভ হতে ব্যর্থ হয়েছে।
+                    </div>
+                </div>
+                <button type="button" class="btn btn-danger float-right" data-dismiss="modal" data-target="#"><i class="fas fa-times"></i> বাতিল করুন </button>
+                <button type="submit" class="btn btn-success float-right" id="btnSubmit"><i class="fas fa-save"></i> সেভ করুন </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script type="text/javascript">
+        var txtEventName = $("#txtEventName");
+        var ddlMonthName = $("#ddlMonthName");
+        var ddlFundInfo = $("#ddlFundInfo");
+        var ddlFundDetail = $("#ddlFundDetail");
+        var ddlFloors = $("#ddlFloors");
+        var txtAmount = $("#txtAmount");
+        var hdfEventId = $("#hdfEventId");
+
+        $("#btnAddNew").click(function (e) {
+            e.preventDefault();
+            OpenModal();
+        })
+
+        function validateForm() {
+            var isValid = true;
+            $('.error').addClass('hide');
+            if (txtEventName.val() == '') {
+                $('.require-eventName').removeClass('hide');
+                isValid = false;
+            }
+            else {
+
+            }
+            if (ddlMonthName.val() == '') {
+                $('.require-MonthName').removeClass('hide');
+                isValid = false;
+            }
+            if (ddlFundInfo.val() == '') {
+                $('.require-fundName').removeClass('hide');
+                isValid = false;
+            }
+            if (ddlFundDetail.val() == '') {
+                $('.require-subFundName').removeClass('hide');
+                isValid = false;
+            }
+            if (txtAmount.val() == '' || TryParseInt(txtAmount.val(), 0) == '0') {
+                $('.require-Amount').removeClass('hide');
+                isValid = false;
+            }
+            if ($("#tblEventFloors tbody tr").length === 0) {
+                $('.require-floors').removeClass('hide');
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        $("#btnAddFloor").click(function (e) {
+            e.preventDefault();
+            if (ddlFloors.val() != '') {
+                $('.event-exist').addClass('hide');
+                if ($("#tblEventFloors tbody tr").length > 0) {
+                    var isExist = false;
+                    $.each($("#tblEventFloors tbody tr"), function (index, item) {
+
+                        if (ddlFloors.val() == $(this).children('td').eq(1).html()) {
+                            isExist = true;
+                        }
+                    })
+                    if (isExist == false) {
+                        var td1 = '<td align="center">' + ($("#tblEventFloors tbody tr").length + 1) + '</td>';
+                        var td2 = '<td class="hide">' + ddlFloors.val() + '</td>';
+                        var td3 = '<td>' + $("#ddlFloors option:selected").text() + '</td>';
+                        var td4 = '<td align="center"><a href="#" class="btn btn-sm btn-danger data-del-item"> X </a></td>';
+                        var tr = '<tr>' + td1 + td2 + td3 + td4 + '</tr>';
+                        $("#tblEventFloors tbody").append(tr);
+                    }
+                    else {
+                        $('.event-exist').removeClass('hide');
+                    }
+                }
+                else {
+                    var td1 = '<td align="center">' + 1 + '</td>';
+                    var td2 = '<td class="hide">' + ddlFloors.val() + '</td>';
+                    var td3 = '<td>' + $("#ddlFloors option:selected").text() + '</td>';
+                    var td4 = '<td align="center"><a href="#" class="btn btn-sm btn-danger data-del-item"> X </a></td>';
+                    var tr = '<tr>' + td1 + td2 + td3 + td4 + '</tr>';
+                    $("#tblEventFloors tbody").append(tr);
+                }
+            }
+        })
+
+        function OpenModal() {
+            clearControl();
+            $('.error').addClass('hide');
+            $("#modalEvent").modal("show");
+        }
+
+        ddlFundInfo.change(function () {
+            clearDropdown("ddlFundDetail");
+            if (ddlFundInfo.val() != '') {
+                LoadDropDown('/Common/GetFundDetailsMonthlyChargeForDDL', 'POST', ddlFundDetail, JSON.stringify({ FundInfoId: ddlFundInfo.val() }));
+            }
+        })
+
+        $('#btnSubmit').click(function (e) {
+            e.preventDefault();
+            if (validateForm()) {
+                var eventDetail = [];
+                eventDetail.length = 0;
+
+                $.each($("#tblEventFloors tbody tr"), function (index, item) {
+                    var floorId = $(this).children('td').eq(1).html();
+                    eventDetail.push({ FloorId: floorId, Amount: TryParseInt(txtAmount.val(), 0) });
+                })
+
+                var eventInfo = JSON.stringify({ EventInfoId: TryParseInt(hdfEventId.val(), 0), EventName: txtEventName.val(), EventMonth: ddlMonthName.val(), Amount: txtAmount.val(), FundInfoId: ddlFundInfo.val(), FundDetailId: ddlFundDetail.val(), EventDetails: eventDetail });
+
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Organization/SaveEvent', eventInfo, getToken())).then(function (res, status) {
+                    if (res == true) {
+                        message("#msg1", "#modalEvent");
+                    } else {
+                        message("#msg2");
+                    }
+                }).fail(function (error) {
+                    alert(execuStatus.fail);
+                })
+            }
+        })
+
+        $(document).on('click', 'a.data-del-item', function (e) {
+            e.preventDefault();
+            var index = $(this).parent().parents('tr').index();
+            removeTableRow("#tblEventFloors tbody", index);
+            fnFixTheTbodyRowSerial("#tblEventFloors", index);
+        })
+
+        $(document).on('click', '.data-edit-item', function (e) {
+            e.preventDefault();
+            var id = $(this).parent().parents('tr').find('td:eq(1)').html();
+            if (TryParseInt(id, 0) > 0) {
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Organization/GetEventInfoById', JSON.stringify({ eventInfoId: id }), getToken())).then(function (res, status) {
+                    console.log(res);
+                    console.log(status);
+                    OpenModal();
+                    hdfEventId.val(res.EventInfoId);
+                    txtEventName.val(res.EventName);
+                    ddlMonthName.val(res.EventMonth);
+                    txtAmount.val(res.Amount);
+                    ddlFundInfo.val(res.FundInfoId);
+                    LoadDropDown4('/Common/GetFundDetailsMonthlyChargeForDDL', 'POST', ddlFundDetail, JSON.stringify({ FundInfoId: ddlFundInfo.val() }), res.FundDetailId);
+
+                    $("#tblEventFloors tbody").empty();
+                    $.each(res.EventDetails, function (index, item) {
+                        var td1 = '<td align="center">' + (index + 1) + '</td>';
+                        var td2 = '<td class="hide">' + item.FloorId + '</td>';
+                        var td3 = '<td>' + item.FloorName + '</td>';
+                        var td4 = '<td align="center"><a href="#" class="btn btn-sm btn-danger data-del-item"> X </a></td>';
+                        var tr = '<tr>' + td1 + td2 + td3 + td4 + '</tr>';
+                        $("#tblEventFloors tbody").append(tr);
+                    })
+
+                }).fail(function (error) {
+                    consoleLog(error);
+                })
+            }
+        })
+
+        function clearControl() {
+            txtEventName.val();
+            ddlMonthName.val('');
+            ddlFundInfo.val('');
+            ddlFundDetail.val('');
+            txtAmount.val('');
+            hdfEventId.val('0');
+            $("#tblEventFloors tbody").empty();
+        }
+    </script>
+}

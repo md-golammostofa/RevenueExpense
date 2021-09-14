@@ -1,0 +1,224 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.Models.Mainmenu>
+
+@{
+    ViewBag.Title = "List of Mainmenu";
+    int count = 0;
+}
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h4> List of Mainmenu </h4>
+    </div>
+    <div class="col-md-12">
+        <div class="form-row">
+            <div class="col-md-4">
+                <input type="text" class="form-control" placeholder="Search By Anything" id="searchBy" onkeyup="fnSearchByAnything(this,'tblMainmenuList')"/>
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <button class="btn btn-icon btn-primary float-right" id="btnAddNew" onclick="OpenModal()"><i class="fas fa-plus"></i> Create New Mainmenu </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <table class="table table-bordered table-sm table-responsive-lg" id="tblMainmenuList">
+            <thead class="btn-info text-center">
+                <tr>
+                    <th>SL.</th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.MenuName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.IconClass)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.EntryUser)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.EntryDate)
+                    </th>
+                    <th>
+                        Action
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    count = count + 1;
+                    <tr>
+                        <td class="text-center">@count</td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.MenuName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IconClass)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.EntryUser)
+                        </td>
+                        <td>
+                            @item.EntryDate.Value.ToString("dd-MMM-yyyy")
+                        </td>
+                        <td>
+                            <a class="btn btn-warning btn-sm btn-icon data-edit-item" data-edit-item="@item.MenuId"><i class="far fa-edit"></i> Edit </a>
+
+                            <a class="btn btn-danger btn-sm btn-icon data-del-item" data-del-item="@item.MenuId"><i>&#10006;</i> Delete </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalMainmenu" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header alert-success">
+                <h4 id="modalHeading" class="modal-title">Add New Mainmenu</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="frmMainmenu">
+                    <input type="hidden" name="Id" id="hdfMainmenuId" />
+                    @Html.AntiForgeryToken()
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="txtMainmenu" class="control-label font-weight-bold">Main menu Name:</label>
+                            <input type="text" value="" id="txtMainmenu" class="form-control" />
+                            <span class="error hide required-mainmenu">Mainmenu name is required.</span>
+                            <span class="error hide duplicate-mainmenu">This mainmenu is already exist</span>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="txtIconClass" class="control-label font-weight-bold">Icon Class Name:</label>
+                            <input type="text" value="" id="txtIconClass" class="form-control" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer btn-light">
+                <div class="col-md-4">
+                    <div id="msg1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে সেভ হয়েছে।
+                    </div>
+                    <div id="msg2" class="alert alert-danger hide float-left">
+                        ডাটা সেভ হতে ব্যর্থ হয়েছে।
+                    </div>
+                </div>
+                <button type="button" class="btn btn-danger float-right" data-dismiss="modal" data-target="#"><i class="fas fa-times"></i> Cancel </button>
+                <button type="submit" class="btn btn-success float-right" id="btnSubmit"><i class="fas fa-save"></i> Save </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<div id="modalDelete" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header btn-warning">
+                    <h4 id="modalHeading" class="modal-title">ফ্লোর বাতিল করুন</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p class="modeldelText">আপনি কি নিশ্চিতভাবে <b class="delvalue"></b> মুছে ফেলতে চান?</p>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-md-7">
+                        <div id="del1" class="alert alert-success hide float-left">
+                            ডাটা সফলভাবে ডিলেট হয়েছে।
+                        </div>
+                        <div id="del2" class="alert alert-danger hide float-left">
+                            কোন সম্যসা হয়েছে/ডাটা ডিলেট হয়নি।
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <button type="button" class="btn btn-success float-right" data-dismiss="modal" data-target="#"> না </button>
+                        <button type="submit" class="btn btn-danger float-right" id="btnDelFloor"> হ্যাঁ </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+@section scripts{
+    <script type="text/javascript">
+
+        var hdfMainmenuId = $("#hdfMainmenuId");
+        var txtMainmenu = $("#txtMainmenu");
+        var txtIconClass = $("#txtIconClass");
+
+        function OpenModal() {
+            $("#modalMainmenu").modal();
+            clearControl();
+            fnModalHeadChange("Add New Mainmeu");
+        }
+
+        function clearControl() {
+            hdfMainmenuId.val('0');
+            txtMainmenu.val('');
+            txtIconClass.val('');
+        }
+
+        function validate() {
+            var isvalid = true;
+            $(".error").addClass("hide");
+            if (txtMainmenu.val().trim() == '') {
+                isvalid = false;
+                $(".required-mainmenu").removeClass("hide");
+            }
+            else {
+                var id = TryParseInt(hdfMainmenuId.val(), 0);
+                var data = JSON.stringify({ id: id, mainmenu: txtMainmenu.val().trim() });
+                if (ajaxBooleanChecker(data, '/Common/IsMainmenuExist', getToken()) == true) {
+                    isvalid = false;
+                    $(".duplicate-mainmenu").removeClass("hide");
+                }
+            }
+            return isvalid;
+        }
+
+        $("#btnSubmit").click(function (e)
+        {
+            e.preventDefault();
+            if (validate() == true)
+            {
+                disable("#btnSubmit");
+                var data = JSON.stringify({ MenuId: TryParseInt(hdfMainmenuId.val(), 0), MenuName: txtMainmenu.val(), IconClass: txtIconClass.val() });
+
+                $.when(postReqWithToken(dataType.applicationJson, dataType.json, 'POST', '/Admin/SaveMainmenu', data, getToken())).then(function (res, status) {
+                    if (res == true)
+                    {
+                        message("#msg1", "#modalMainmenu");
+                    }
+                    else
+                    {
+                        message("#msg2");
+                    }
+                    enable("#btnSubmit");
+                }).fail(function (error) {
+                    alert(execuStatus.fail)
+                    console.log(error);
+                    enable("#btnSubmit");
+                })
+                enable("#btnSubmit");
+            }
+        })
+
+        $(document).on("click", "a.data-edit-item", function (e)
+        {
+            e.preventDefault();
+            var id = $(this).attr("data-edit-item");
+            var mainmenuName = $(this).parent().parents('tr').find("td:eq(1)").html();
+            var iconClass = $(this).parent().parents('tr').find("td:eq(2)").html();
+
+            OpenModal();
+            fnModalHeadChange("Update Mainmeu");
+            hdfMainmenuId.val(id);
+            txtMainmenu.val(mainmenuName.trim());
+            txtIconClass.val(iconClass.trim());
+        })
+
+    </script>
+}

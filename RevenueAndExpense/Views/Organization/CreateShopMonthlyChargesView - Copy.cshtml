@@ -1,0 +1,181 @@
+﻿@model RevenueAndExpense.BO.ViewModels.VmShopMonthlyChargeInfo
+
+@{
+    ViewBag.Title = "Create Shop Monthly Bill";
+}
+
+<div class="row">
+    <br />
+    <br />
+    <div class="col-md-12">
+        <a href="/Organization/ShopPanel" class="btn btn-primary float-left" title="লিস্টে ফিরে যান"><i class="fas fa-arrow-left"></i></a>
+        <h4 class="text-center">শপের মাসিক বিল</h4>
+        <hr />
+    </div>
+    <div class="col-md-12">
+        @using (Html.BeginForm("SaveShopMonthlyCharges", "Organization", FormMethod.Post,new {@id="formData" }))
+        {
+            @Html.AntiForgeryToken()
+            <div>
+                @Html.ValidationSummary(false,"",new {@class="text-danger" })
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label class="control-label font-weight-bold" for="ShopId">শপঃ</label>
+                    @Html.DropDownList("ShopId", (IEnumerable<SelectListItem>)ViewBag.Shops, "শপ সিলেক্ট করুন", new { @class = "form-control hide" })
+                    <input type="text" value="" id="txtShopName" class="form-control" />
+                    @Html.ValidationMessageFor(m => m.ShopId, null, new { @class = "error" })
+                </div>
+                <div class="form-group col-md-4">
+                    <label class="control-label font-weight-bold" for="Date">মাস এবং সালঃ</label>
+                    @Html.DropDownList("Date", (IEnumerable<SelectListItem>)ViewBag.MonthAndYear, "মাস এবং সাল সিলেক্ট করুন", new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.Date, null, new { @class = "error" })
+                </div>
+                <div class="form-group col-md-4">
+                    <label class="control-label font-weight-bold" for="" style="visibility:hidden">SaveSave</label>
+                    <div>
+                        <button type="submit" class="btn btn-success" id="btnSubmit"> সেভ করুন </button>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div>
+                <span class="error hide">Error</span>
+            </div>
+            <div class="row">
+                <div class="col-md-12" id="details">
+                    @if (Model != null)
+                    {
+                        if (Model.ChargeDetails != null) {
+                            @Html.Partial("_CreateShopBillView",Model.ChargeDetails)
+                        }
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        var ddlShopId = $("#ShopId");
+        var ddlDate = $("#Date");
+        var txtShopName = $("#txtShopName");
+
+        ddlDate.change(function () {
+            $("#details").empty();
+            loadData();
+        })
+
+        ddlShopId.change(function () {
+            $("#details").empty();
+            loadData();
+        })
+
+        function loadData() {
+            $(".validation-summary-errors").empty();
+            if (ddlDate.val() != "" && ddlShopId.val() != "" && TryParseInt(ddlShopId.val(), 0) > 0 && txtShopName.val().trim()!='')
+            {
+                var data = JSON.stringify({ shopId: ddlShopId.val(), date: ddlDate.val() });
+                //console.log((data));
+                $("#details").empty();
+                $.when(postReqWithData(dataType.applicationJson, 'html', 'POST', '/Organization/CreateShopBillView', data)).then(function (res,status) {
+                    if (status == 'success')
+                    {
+                        $("#details").append(res);
+                    }
+                }).fail(function (error) {
+                    alert(execuStatus.fail)
+                    console.log(error);
+                })
+
+            }
+        }
+
+        $(document).on("keyup", ".form-keyup", function myfunction() {
+            var value = $(this).val();
+
+            var prevUnit = $(this).hasClass("prev-unit");
+            var currUnit = $(this).hasClass("curr-unit");
+            var elecRate = $(this).hasClass("elec-rate");
+            var fanConsumFan = $(this).hasClass("fan-consumFan");
+            var fanRate = $(this).hasClass("fan-rate");
+            
+            if (prevUnit || currUnit || elecRate)
+            {
+                var prev = $(this).parent().parents('tr').find('td:eq(2)').children("input[type='number']").val();
+                var current = $(this).parent().parents('tr').find('td:eq(3)').children("input[type='number']").val();
+                var rate = $(this).parent().parents('tr').find('td:eq(5)').children("input[type='number']").val();
+                var amt = $(this).parent().parents('tr').find('td:eq(6)').children("input[type='number']").val(0);
+                //alert(rate);
+                var diff = ((TryParseFloat(current, 0)) < (TryParseFloat(prev, 0))) ? 0 : (TryParseFloat(current, 0) - TryParseFloat(prev, 0));
+                if (diff > 0)
+                {
+                    $(this).parent().parents('tr').find('td:eq(4)').children("input[type='number']").val(diff);
+                    if (rate > 0)
+                    {
+                        $(this).parent().parents('tr').find('td:eq(6)').children("input[type='number']").val(Math.round(diff * rate));
+                    }
+                    else {
+                        $(this).parent().parents('tr').find('td:eq(6)').children("input[type='number']").val(0);
+                        $(this).parent().parents('tr').find('td:eq(5)').children("input[type='number']").val(0);
+                    }
+                }
+                else {
+                    $(this).parent().parents('tr').find('td:eq(4)').children("input[type='number']").val(0);
+                    $(this).parent().parents('tr').find('td:eq(6)').children("input[type='number']").val(0);
+                }
+            }
+
+            else if (fanConsumFan || fanRate) {
+                var fanElec = $(this).parent().parents('tr').find('td:eq(2)').children("input[type='number']").val();
+                var rate = $(this).parent().parents('tr').find('td:eq(3)').children("input[type='number']").val();
+                $(this).parent().parents('tr').find('td:eq(4)').children("input[type='number']").val(0);
+                if (TryParseFloat(fanElec, 0) > 0 && TryParseFloat(rate, 0) > 0)
+                {
+                    $(this).parent().parents('tr').find('td:eq(4)').children("input[type='number']").val(Math.round(fanElec * rate));
+                }
+                else {
+                    $(this).parent().parents('tr').find('td:eq(2)').children("input[type='number']").val('');
+                }
+            }
+        })
+
+        //------Auto Complete-----//
+        txtShopName.autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("GetShopNameWithFloorAndHolding", "Common")',
+                    type:'POST',
+                    dataType: "json",
+                    data: { contextKey: txtShopName.val() },
+                    headers:getToken(),
+                    success: function (data) {
+                        console.log(data);
+                        ddlShopId.val('');
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.text, id: item.value};
+                        }));
+                    },
+                    error: function (xhr, status, error) {
+                        console.log(error);
+                    }
+                });
+            },
+            select: function (event, ui) {
+                $("#details").empty();
+                txtShopName.val(ui.item.value);
+                ddlShopId.val(ui.item.id);
+                ddlShopId.trigger("change");
+            },
+            messages: {
+                noResults: "failure"
+            },
+            minLength: 0
+        }).focus(function () {
+            $(this).autocomplete("search")
+            });
+    </script>    
+}
+

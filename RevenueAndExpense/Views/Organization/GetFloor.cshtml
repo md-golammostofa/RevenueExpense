@@ -1,0 +1,251 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ViewModels.VmFloor>
+
+@{
+    ViewBag.Title = "List of Floor";
+    int slNo = 0;
+}
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h4>ফ্লোরের তালিকা</h4>
+        <hr />
+    </div>
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-4">
+                <input type="text" name="search" id="searchBy" class="form-control form-control-sm" placeholder="যেকোন কিছু দিয়ে সার্চ করুন" onkeyup="tableFilter('#tblFloorData tbody tr',this)" />
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <button class="btn btn-primary float-lg-right" id="btnAddNew"><i class="fa fa-plus"></i> নতুন ফ্লোর তৈরি করুন</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12" style="margin-top:5px">
+        <table class="table table-bordered table-hover table-sm table-responsive-lg" id="tblFloorData">
+            <thead class="btn-info text-center">
+                <tr>
+                    <th class="hide"></th>
+                    <th>SL No.</th>
+                    <th>ফ্লোরের নাম</th>
+                    <th>মন্ত্যব</th>
+                    <th>প্রতিষ্ঠান</th>
+                    <th>এন্ট্রি ইউজার</th>
+                    <th>অ্যাকশান</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    slNo = slNo + 1;
+                    <tr>
+                        <td class="hide">@item.FloorId</td>
+                        <td class="text-center" style="width:7%">@slNo</td>
+                        <td>@item.FloorNo</td>
+                        <td>@item.Remarks</td>
+                        <td>@item.OrganizationName</td>
+                        <td>@item.EntryUser</td>
+                        <td class="text-center" style="width:25%">
+                            <a href="#" class="btn btn-icon btn-warning data-edit-floor" data-edit-item="@item.FloorId"><i class="far fa-edit"></i> এডিট </a>
+                            <a href="#" class="btn btn-icon btn-danger data-del-floor" data-del-item="@item.FloorId"><i class="fas fa-times"></i> ডিলেট </a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count() == 0)
+                {
+                    <tr class="text-center">
+                        <td colspan="6">No Data Found..</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalFloor" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header alert-success">
+                <h4 id="modalHeading" class="modal-title">নতুন ফ্লোর তৈরি করুন</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="frmFloor">
+                    <input type="hidden" name="Id" id="hdfFloorId" />
+                    @Html.AntiForgeryToken()
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="txtFloorNo" class="control-label font-weight-bold">ফ্লোর নংঃ</label>
+                            <input type="text" name="floorNo" value="" id="txtFloorNo" class="form-control" />
+                            <span class="error hide required-floorNo">ফ্লোর নং আবশ্যক</span>
+                            <span class="error hide duplicate-floorNo">এই নম্বরে ইতিমধ্যে ফ্লোর আছে</span>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="txtRemarks" class="control-label font-weight-bold">মন্তব্যঃ</label>
+                            <textarea type="" name="remarks" id="txtRemarks" class="form-control" cols="20" rows="2"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer btn-light">
+                <div class="col-md-4">
+                    <div id="msg1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে সেভ হয়েছে।
+                    </div>
+                    <div id="msg2" class="alert alert-danger hide float-left">
+                        ডাটা সেভ হতে ব্যর্থ হয়েছে।
+                    </div>
+                </div>
+                <button type="button" class="btn btn-danger float-right" data-dismiss="modal" data-target="#"><i class="fas fa-times"></i> বাতিল করুন </button>
+                <button type="submit" class="btn btn-success float-right" id="btnSubmit"><i class="fas fa-save"></i> সেভ করুন </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalDelete" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header btn-warning">
+                <h4 id="modalHeading" class="modal-title">ফ্লোর বাতিল করুন</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="modeldelText">আপনি কি নিশ্চিতভাবে <b class="delvalue"></b> মুছে ফেলতে চান?</p>
+            </div>
+            <div class="modal-footer">
+                <div class="col-md-7">
+                    <div id="del1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে ডিলেট হয়েছে।
+                    </div>
+                    <div id="del2" class="alert alert-danger hide float-left">
+                        কোন সম্যসা হয়েছে/ডাটা ডিলেট হয়নি।
+                    </div>
+                </div>
+                <button type="button" class="btn btn-success float-right" data-dismiss="modal" data-target="#"> না </button>
+                <button type="submit" class="btn btn-danger float-right" id="btnDelFloor"> হ্যাঁ </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+
+        var txtFloorNo = $("#txtFloorNo");
+        var txtRemarks = $("#txtRemarks");
+        var hdfFloorId = $("#hdfFloorId");
+
+        function OpenModal() {
+            clearControl();
+            $("#modalFloor").modal("show");
+            $(".error").addClass("hide");
+        }
+
+        $("#btnAddNew").click(function (e) {
+            e.preventDefault();
+            OpenModal();
+        })
+
+        $(document).on("click", "a.data-del-floor", function (e) {
+            e.preventDefault();
+            $(".modal-body p.modeldelText b.delvalue").text('');
+            var floorNo = $(this).parent().parents('tr').find("td:eq(2)").html();
+            var id = $(this).parent().parents('tr').find("td:eq(0)").html();
+            $(".modal-body p.modeldelText b.delvalue").text(floorNo);
+            console.log(floorNo);
+            hdfFloorId.val(id);
+            $("#modalDelete").modal("show");
+        })
+
+        $("#btnSubmit").click(function (e) {
+            e.preventDefault();
+            $(".error").addClass("hide");
+            if (validateForm() == true) {
+                disable("#btnSubmit");
+                var id = $.trim(hdfFloorId.val()) != "" ? TryParseInt(hdfFloorId.val(), 0) : hdfFloorId.val();
+                var data = JSON.stringify({ floorId: id, floorNo: txtFloorNo.val(), remarks: txtRemarks.val() });
+                console.log(data);
+                $.when(postReqWithData(dataType.applicationJson, dataType.json, 'POST', '/Organization/SaveFloor', data)).then(function (res, status) {
+                    console.log(status);
+                    console.log(res);
+                    if (res == true) {
+                        message("#msg1", "#modalFloor");
+                    }
+                    else {
+                        message("#msg2");
+                    }
+                    enable("#btnSubmit");
+                }).fail(function (error) {
+                    console.log(error);
+                    enable("#btnSubmit");
+                })
+            };
+        })
+
+        $(document).on("click", "a.data-edit-floor", function (e) {
+            e.preventDefault();
+            var id = $(this).attr("data-edit-item");
+            $.when(postReqWithData(dataType.applicationJson, dataType.json, 'POST', '/Organization/GetFloorById', JSON.stringify({ id: id }))).then(function (res, status) {
+                console.log(res);
+                console.log(status);
+                if (res != null) {
+                    OpenModal();
+                    hdfFloorId.val(res.FloorId);
+                    txtFloorNo.val(res.FloorNo);
+                    txtRemarks.val(res.Remarks);
+                }
+                else {
+                    alert("No data found..")
+                }
+            }).fail(function (error) {
+                console.log(error);
+            })
+        })
+
+        $("#btnDelFloor").click(function (e) {
+            e.preventDefault();
+            var id = $.trim(hdfFloorId.val()) == "" ? 0 : TryParseInt(hdfFloorId.val(), 0);
+            var data = JSON.stringify({ floorId: id })
+            disable("#btnDelFloor");
+            $.when(postReqWithData(dataType.applicationJson, dataType.json, 'POST', '/Organization/DeleteFloor', data)).then(function (res, status) {
+                console.log(res);
+                console.log(status);
+                if (res == true) {
+                    message("#del1", "#modalDelete");
+                } else {
+                    message("#del2");
+                }
+                enable("#btnDelFloor");
+            }).fail(function (error) {
+                console.log(error);
+                enable("#btnDelFloor");
+            })
+        })
+
+        function validateForm() {
+
+            $(".error").addClass("hide");
+            var isValid = true;
+            if ($.trim(txtFloorNo.val()) == "") {
+                $(".required-floorNo").removeClass("hide");
+                isValid = false;
+            }
+            else {
+                var id = TryParseInt(hdfFloorId.val(), 0);
+                if (ajaxBooleanChecker(JSON.stringify({ id: id, floorName: txtFloorNo.val().trim() }), '/Common/IsFloorExist', getToken()) == true) {
+                    $(".duplicate-floorNo").removeClass("hide");
+                    isValid = false;
+                }
+            }
+            return isValid;
+        }
+
+        function clearControl() {
+            hdfFloorId.val("0");
+            txtFloorNo.val('');
+            txtRemarks.val('');
+        }
+    </script>
+}
+

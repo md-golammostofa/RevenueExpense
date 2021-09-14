@@ -1,0 +1,71 @@
+﻿@model IEnumerable<VmDashBoardDueBillDetail>
+@using RevenueAndExpense.BO.ViewModels;
+@{
+    Layout = null;
+    VmShop shop = (VmShop)ViewBag.ShopInfo;
+}
+
+
+<div class="row">
+    @if (Model.Count() > 0)
+    {
+        <div class="col-md-12">
+            <table class="table table-bordered table-sm table-responsive-lg font-weight-bold">
+                <tr>
+                    <td>শপের নামঃ</td>
+                    <td>@shop.ShopName</td>
+                    <td>ফ্লোর নংঃ</td>
+                    <td>@shop.FloorName</td>
+                </tr>
+                <tr>
+                    <td>হোল্ডিং</td>
+                    <td>@shop.HoldingNo</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+        <div class="col-md-12">
+            <table class="table table-bordered table-sm table-responsive-lg">
+                <thead class="btn-info">
+                    <tr class="text-center">
+                        <th>বিলের মাস</th>
+                        <th>বিল</th>
+                        <th>জরিমানা</th>
+                        <th>মোট টাকা</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.BillMonth</td>
+                            <td>@item.TotalAmountBN</td>
+                            <td>@item.FineBN</td>
+                            <td>@item.GrossAmountBN</td>
+                        </tr>
+                    }
+                    <tr>
+                        <td></td>
+                        <td>মোট বিল - @ViewBag.TotalAmount</td>
+                        <td>মোট জরিমানা - @ViewBag.TotalFine</td>
+                        <td>মোট টাকা - @ViewBag.TotalGross</td>
+                    </tr>
+                    <tr style="display:none">
+                        <td colspan="3">
+                            সর্বমোট বকেয়া বিল
+                        </td>
+                        <td>@ViewBag.Total</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-12 text-center">
+            <h5>No Data Found</h5>
+        </div>
+    }
+</div>
+

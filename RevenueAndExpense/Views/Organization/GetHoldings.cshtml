@@ -1,0 +1,377 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ViewModels.VmHolding>
+
+@{
+    ViewBag.Title = "List of Holdings";
+    int slNo = 0;
+}
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h4>হোল্ডিংসের তালিকা</h4>
+        <hr />
+    </div>
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-3">
+                @Html.AntiForgeryToken()
+                @Html.DropDownList("ddlFloorList", (IEnumerable<SelectListItem>)ViewBag.FloorList, "ফ্লোর সিলেক্ট করুন", new { @class = "form-control" })
+            </div>
+            <div class="col-md-4">
+                <input type="text" name="" id="txtSearchHolding" class="form-control" placeholder="হোল্ডিং নং লেখুন" />
+            </div>
+            <div class="col-md-2">
+                <h3>
+                    <label id="tbl-row-count">0</label>
+                    <span style="font-size:x-small">(Rows)</span>
+                </h3>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary float-lg-right" id="btnAddNew"><i class="fa fa-plus"></i> নতুন হোল্ডিং তৈরি করুন</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12" style="margin-top:5px" id="dataContainer">
+        <table class="table table-bordered table-hover table-sm table-responsive-lg" id="tblHoldingData">
+            <thead class="btn-info text-center">
+                <tr>
+                    <th class="hide"></th>
+                    <th>SL No.</th>
+                    <th>হোল্ডিং নং</th>
+                    <th>মন্ত্যব</th>
+                    <th class="hide"></th>
+                    <th>ফ্লোর নং</th>
+                    <th class="hide"></th>
+                    <th>প্রতিষ্ঠান</th>
+                    <th>এন্ট্রি ইউজার</th>
+                    <th>অ্যাকশান</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    slNo = slNo + 1;
+                    <tr>
+                        <td class="hide">@item.HoldingId</td>
+                        <td class="text-center" style="width:7%">@slNo</td>
+                        <td>@item.HoldingName</td>
+                        <td>@item.Remarks</td>
+                        <td class="hide">@item.FloorId</td>
+                        <td align="center">@item.FloorNo</td>
+                        <td class="hide">@item.OrganizationId</td>
+                        <td>@item.OrganizationName</td>
+                        <td>@item.EntryUser</td>
+                        <td class="text-center" style="width:25%">
+                            <a href="#" class="btn btn-icon btn-warning data-edit-holding" data-edit-item="@item.HoldingId"><i class="far fa-edit"></i> এডিট </a>
+                            <a href="#" class="btn btn-icon btn-danger data-del-holding" data-del-item="@item.HoldingId"><i class="fas fa-times"></i> ডিলেট </a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count() == 0)
+                {
+                    <tr class="text-center">
+                        <td colspan="7">No Data Found..</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalHolding" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header alert-success">
+                <h4 id="modalHeading" class="modal-title">নতুন হোল্ডিং তৈরি করুন</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="frmFloor">
+                    <input type="hidden" name="Id" id="hdfHoldingId" />
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="txtFloorNo" class="control-label font-weight-bold">হোল্ডিং নংঃ</label>
+                            <input type="text" name="holdingNo" value="" id="txHoldingNo" class="form-control" />
+                            <span class="error hide required-holdingNo">হোল্ডিং নং আবশ্যক</span>
+                            <span class="error hide duplicate-holdingNo">এই নম্বরে ইতিমধ্যে হোল্ডিং আছে</span>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="ddlFloor" class="control-label font-weight-bold">ফ্লোর নংঃ</label>
+                            <select class="form-control" id="ddlFloor">
+                                <option value="">ফ্লোর সিলেক্ট করুন</option>
+                            </select>
+                            <span class="error hide required-floorNo">ফ্লোর সিলেক্ট করুন</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="txtRemarks" class="control-label font-weight-bold">মন্তব্যঃ</label>
+                            <textarea type="" name="remarks" id="txtRemarks" class="form-control" cols="20" rows="2"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer btn-light">
+                <div class="col-md-6">
+                    <div id="msg1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে সেভ হয়েছে।
+                    </div>
+                    <div id="msg2" class="alert alert-danger hide float-left">
+                        ডাটা সেভ হতে ব্যর্থ হয়েছে।
+                    </div>
+                </div>
+                <button type="button" class="btn btn-danger float-right" data-dismiss="modal" data-target="#"><i class="fas fa-times"></i> বাতিল করুন </button>
+                <button type="submit" class="btn btn-success float-right" id="btnSubmit"><i class="fas fa-save"></i> সেভ করুন </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalDelete" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header btn-warning">
+                <h4 id="modalHeading" class="modal-title">হোল্ডিং বাতিল করুন</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="modeldelText">আপনি কি নিশ্চিতভাবে <b class="delvalue"></b> মুছে ফেলতে চান?</p>
+            </div>
+            <div class="modal-footer">
+                <div class="col-md-7">
+                    <div id="del1" class="alert alert-success hide float-left">
+                        ডাটা সফলভাবে ডিলেট হয়েছে।
+                    </div>
+                    <div id="del2" class="alert alert-danger hide float-left">
+                        কোন সম্যসা হয়েছে/ডাটা ডিলেট হয়নি।
+                    </div>
+                </div>
+                <button type="button" class="btn btn-success float-right" data-dismiss="modal" data-target="#"> না </button>
+                <button type="submit" class="btn btn-danger float-right" id="btnDelHolding"> হ্যাঁ </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+
+        var txtHoldingNo = $("#txHoldingNo");
+        var ddlFloor = $("#ddlFloor");
+        var txtRemarks = $("#txtRemarks");
+        var hdfHoldingId = $("#hdfHoldingId");
+        var tblRowCount = $("#tbl-row-count");
+        //--------------//
+        var ddlFloorList = $("#ddlFloorList");
+        var txtSearchHolding = $("#txtSearchHolding");
+
+        $(document).ready(function () {
+            LoadDropDown('/Common/GetFloorsForDDL', 'POST', ddlFloor);
+            fntableRowCount("tblHoldingData", "tbl-row-count");
+        })
+
+        ddlFloorList.change(function () {
+            txtSearchHolding.val('');
+            LoadSearchableData();
+        })
+
+        function LoadData() {
+            var floorId = TryParseInt(ddlFloorList.val(), 0);
+            var holdingTxt = txtSearchHolding.val().trim();
+
+            var data = { floorId: txtSearchHolding.val(), };
+        }
+
+        function OpenModal() {
+            clearControl();
+            $(".error").addClass("hide");
+            $("#modalHolding").modal("show");
+        }
+
+        $("#btnAddNew").click(function (e) {
+            e.preventDefault();
+            OpenModal();
+        })
+
+        $(document).on("click", "a.data-edit-holding", function (e) {
+            e.preventDefault();
+            var id = $(this).attr("data-edit-item");
+            var data = JSON.stringify({ Id: id });
+            $.when(postReqWithData(dataType.applicationJson, dataType.json, 'POST', '/Organization/GetHoldingById', data)).then(function (res, status) {
+                console.log(res);
+                console.log(status);
+                if (res != null) {
+                    OpenModal();
+                    hdfHoldingId.val(res.HoldingId);
+                    txtHoldingNo.val(res.HoldingName);
+                    ddlFloor.val(res.FloorId);
+                    txtRemarks.val(res.Remarks);
+                }
+            }).fail(function (error) {
+                console.log(error);
+                alert(execuStatus.fail);
+            })
+        })
+
+        $("#btnSubmit").click(function (e) {
+            e.preventDefault();
+
+            if (validateForm() == true) {
+                disable("#btnSubmit");
+                var id = hdfHoldingId.val() == '' ? '0' : TryParseInt(hdfHoldingId.val(), 0);
+                var data = JSON.stringify({ HoldingId: id, HoldingName: txtHoldingNo.val(), Remarks: txtRemarks.val(), FloorId: ddlFloor.val(), FloorNo: $("#ddlFloor option:selected").text() })
+                console.log(data);
+                $.when(postReqWithData(dataType.applicationJson, dataType.json, 'POST', '/Organization/SaveHolding', data)).then(function (res, status) {
+                    console.log(res);
+                    console.log(status);
+                    if (res == true) {
+                        message("#msg1", "#modalHolding");
+                    }
+                    else {
+                        message("#msg2");
+                    }
+                    enable("#btnSubmit");
+                }).fail(function (error) {
+                    console.log(error);
+                    message("#msg2");
+                    enable("#btnSubmit");
+                })
+
+            }
+        })
+
+        function validateForm() {
+            var isValid = true;
+
+            $(".error").addClass("hide");
+            if ($.trim(txtHoldingNo.val()) == "")
+            {
+                isValid = false;
+                $(".required-holdingNo").removeClass("hide");
+            }
+
+            if (ddlFloor.val() == '')
+            {
+                isValid = false;
+                $(".required-floorNo").removeClass("hide");
+            }
+
+            if ($.trim(txtHoldingNo.val()) != "" && ddlFloor.val() != '')
+            {
+                //int holdingId, string holdingName, int floorId
+                var id = hdfHoldingId.val() == "" ? 0 : TryParseInt(hdfHoldingId.val(), 0);
+
+                var data = JSON.stringify({ holdingId: id, holdingName: txtHoldingNo.val(), floorId: ddlFloor.val() });
+                console.log("Holding Checker");
+                console.log(data);
+                if (ajaxBooleanChecker2(data,'/Common/IsHoldingExistByFloorId')== true)
+                {
+                    $(".duplicate-holdingNo").removeClass("hide");
+                    isValid = false;
+                }
+            }
+            return isValid;
+        }
+
+        function clearControl() {
+            txtHoldingNo.val('');
+            ddlFloor.val('');
+            txtRemarks.val('');
+            hdfHoldingId.val('0');
+        }
+
+        $(document).on("click", "a.data-del-holding", function (e) {
+            e.preventDefault();
+            clearControl();
+            $("#modalDelete").modal("show");
+            var hid = $(this).parent().parents('tr').find('td:eq(0)').html();
+            hdfHoldingId.val(hid);
+            var hname = $(this).parent().parents('tr').find('td:eq(2)').html();
+            $(".delvalue").text(hname);
+        })
+
+        $("#btnDelHolding").click(function (e) {
+            e.preventDefault();
+            var id = $.trim(hdfHoldingId.val()) == "" ? 0 : TryParseInt(hdfHoldingId.val(), 0);
+            var data = JSON.stringify({ Id: id })
+            disable("#btnDelHolding");
+            $.when(postReqWithData(dataType.applicationJson, dataType.json, 'POST', '/Organization/DeleteHolding', data)).then(function (res, status) {
+                console.log(res);
+                console.log(status);
+                if (res == true) {
+                    message("#del1", "#modalDelete");
+                } else {
+                    message("#del2");
+                }
+                enable("#btnDelHolding");
+            }).fail(function (error) {
+                console.log(error);
+                enable("#btnDelHolding");
+            })
+        })
+
+        txtSearchHolding.keyup(function () {
+            if (txtSearchHolding.val() == '')
+            {
+                LoadSearchableData();
+            }
+        })
+
+        // Holding Auto Complete //
+        txtSearchHolding.autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("GetHoldingByFloorId", "Common")',
+                    type:'POST',
+                    dataType: "json",
+                    data: { floorId:TryParseInt(ddlFloorList.val(),0),contextKey: txtSearchHolding.val() },
+                    headers:getToken(),
+                    success: function (data) {
+                        console.log(data);
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.text, id: item.value};
+                        }));
+                    },
+                    error: function (xhr, status, error) {
+                        console.log(error);
+                    }
+                });
+            },
+            select: function (event, ui) {
+                //$("#details").empty();
+                //txtShopName.val(ui.item.value);
+                //ddlShopId.val(ui.item.id);
+                //ddlShopId.trigger("change");
+                var txt = ui.item.value.substring(ui.item.value.indexOf('-') + 1);
+                txtSearchHolding.val(txt);
+                txt = ui.item.value.substring(ui.item.value.indexOf('-') + 1);
+                ui.item.value = txt;
+                LoadSearchableData();
+            },
+            messages: {
+                noResults: "failure"
+            },
+            minLength: 0
+        }).focus(function () {
+            $(this).autocomplete("search")
+            });
+        //-------------------------------//
+
+        function LoadSearchableData() {
+            var FloorId = TryParseInt(ddlFloorList.val(), 0);
+            var holding = txtSearchHolding.val();
+
+            var data = JSON.stringify({ floorId: FloorId, holdingNo: holding });
+            $("#tbl-row-count").text('0');
+            $.when(postReqWithToken(dataType.applicationJson, 'html', 'POST', '/Organization/GetHoldingsBySearch', data, getToken())).then(function (res, status)
+            {
+                $("#dataContainer").empty();
+                if (status == "success") {
+                    $("#dataContainer").append(res);
+                    fntableRowCount("tblHoldingData", "tbl-row-count");
+                }
+            }).fail(function (error) {
+                console.log(error);
+                })
+        }
+    </script>
+}

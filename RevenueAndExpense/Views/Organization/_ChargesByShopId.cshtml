@@ -1,0 +1,31 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ViewModels.VmShopCharge>
+
+@{
+    int sl = 0;
+}
+<table class="table table-bordered table-sm table-responsive-lg">
+    <thead class="btn-dark">
+        <tr class="text-center">
+            <td width="15%">সিরিয়াল</td>
+            <td class="hide"></td>
+            <td width="25%">ফান্ডের নাম</td>
+            <td class="hide"></td>
+            <td>চার্জ সমূহ</td>
+            <td>টাকা</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            sl = sl + 1;
+            <tr>
+                <td class="text-center" width="15%">@sl</td>
+                <td class='hide'>@item.FundInfoId</td>
+                <td class='20%'>@item.FundNameBN</td>
+                <td class="hide">@item.FundDetailId</td>
+                <td>@item.FundDetailNameBN</td>
+                <td class="text-center" width="15%">@item.ChargeAmountEN</td>
+            </tr>
+        }
+    </tbody>
+</table>

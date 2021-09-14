@@ -1,0 +1,173 @@
+﻿@using RevenueAndExpense.BO.ViewModels;
+@using RevenueAndExpense.BLL.Utility;
+@{
+    ViewBag.Title = "Admin Deshboard";
+    string totalAmount = string.Empty;
+
+}
+
+<h2><span style="font-size:medium; color:#0094ff"><i class="fas fa-fire"></i> ড্যাশবোর্ড</span> </h2>
+<hr />
+<div class="row">
+    <div class="col-12 col-md-6 col-lg-3">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h4>আজকের আয়</h4>
+            </div>
+            <div class="card-body">
+                @foreach (var item in (IEnumerable<VmDashBoardTodayFundRevenue>)ViewBag.DashBoardTodayFundRevenue)
+                {
+                    <p>@item.FundNameBN @Ajax.ActionLink(item.AmountBN.ToString(), "GetDashboardShopTodayFundDetailRevenue", "Organization", new { fundInfoId = item.FundInfoId }, new AjaxOptions { InsertionMode = InsertionMode.Replace, UpdateTargetId = "DataFundDetailRevenue", HttpMethod = "POST" }, new { @class = "badge badge-success float-right", data_toggle = "modal", data_target = "#ModalFundDetailRevenue" })</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+        <div class="card card-success">
+            <div class="card-header">
+                <h4>চলতি মাসের আয়</h4>
+            </div>
+            <div class="card-body">
+                @foreach (var item in (IEnumerable<VmDashBoardTodayFundRevenue>)ViewBag.DashBoardThisMonthFundRevenue)
+                {
+                    <p>@item.FundNameBN @Ajax.ActionLink(item.AmountBN.ToString(), "GetDashboardShopThisMonthFundDetailRevenue", "Organization", new { fundInfoId = item.FundInfoId }, new AjaxOptions { InsertionMode = InsertionMode.Replace, UpdateTargetId = "DataFundDetailRevenue", HttpMethod = "POST" }, new { @class = "badge badge-success float-right", data_toggle = "modal", data_target = "#ModalFundDetailRevenue" })</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+        <div class="card card-warning">
+            <div class="card-header">
+                <h4>শপের মাসিক বকেয়ার সংখ্যা</h4>
+            </div>
+            <div class="card-body">
+                @foreach (var item in (IEnumerable<VmDashBoardMonthlyBillDueCount>)ViewBag.DashboardMonthlyBillDueCount)
+                {
+                    <p>@item.ShopName @Ajax.ActionLink(item.TotalDueMonth.ToString(), "GetDashboardShopDueBills", "Organization", new { shopid = item.ShopId }, new AjaxOptions { InsertionMode = InsertionMode.Replace, UpdateTargetId = "ViewDueBills", HttpMethod = "POST" }, new { @class = "badge badge-success float-right", data_toggle = "modal", data_target = "#ModalCenter" })</p>
+
+
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-md-6 col-lg-6">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h4>ফান্ড ব্যালেন্স</h4>
+                <div class="card-header-action">
+                    <a href="#" class="btn btn-primary">
+                        <i class="fas fa-coins"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr class="text-center">
+                            <th class="hide"></th>
+                            <th>ফান্ড</th>
+                            <th class="hide"></th>
+                            <th class="hide"></th>
+                            <th>ক্যাশ ব্যালেন্স</th>
+                            <th>ব্যাংক ব্যালেন্স</th>
+                            <th>মোট</th>
+                        </tr>
+                    </thead>
+                    @foreach (var item in (IEnumerable<VmDashBoardFundBalance>)ViewBag.DashBoardFundBalance)
+                    {
+                        totalAmount = string.Empty;
+                        totalAmount = Utility.ConvertEnNumToBnNum((item.CashAmount + item.BankAmount).ToString());
+                        <tr>
+                            <td class="hide">@item.FundId</td>
+                            <td>@item.FundNameBN</td>
+                            <td class="hide">@item.CashAmount</td>
+                            <td class="hide">@item.BankAmount</td>
+                            <td align="right"><b>@item.CashAmountBN</b></td>
+                            <td align="right"><b>@item.BankAmountBN</b></td>
+                            <td align="right"><b>@totalAmount</b></td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-6">
+        <div class="card card-success">
+            <div class="card-header">
+                <h4>ব্যাংক ব্যালেন্স</h4>
+                <div class="card-header-action">
+                    <a href="#" class="btn btn-success">
+                        <i class="fas fa-coins"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr class="text-center">
+                            <th class="hide"></th>
+                            <th>ব্যাংক</th>
+                            <th class="hide"></th>
+                            <th>ফান্ড</th>
+                            <th class="hide"></th>
+                            <th>ব্যালেন্স</th>
+                        </tr>
+                    </thead>
+                    @foreach (var item in (IEnumerable<VmDashBoardBankBalance>)ViewBag.DashBoardBankBalance)
+                    {
+                        <tr>
+                            <td class="hide">@item.BankId</td>
+                            <td>@item.Bank</td>
+                            <td class="hide">@item.FundInfoId</td>
+                            <td>@item.FundNameBN</td>
+                            <td class="hide"><b>@item.Balance</b></td>
+                            <td align="right"><b>@item.BalanceBN</b></td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">বকেয়া বিল</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" value="0" id="hdfShopId" />
+                <div id="ViewDueBills">
+
+                </div>
+            </div>
+            <div class="modal-footer btn-light">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="ModalFundDetailRevenue" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="DataFundDetailRevenue">
+
+                </div>
+            </div>
+            <div class="modal-footer btn-light">
+            </div>
+        </div>
+    </div>
+</div>

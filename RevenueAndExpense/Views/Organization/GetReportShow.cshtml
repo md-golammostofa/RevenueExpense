@@ -1,0 +1,124 @@
+﻿@model IEnumerable<RevenueAndExpense.BO.ReportModels.RevenueExpenseDetail>
+
+@{
+    ViewBag.Title = "GetReportShow";
+    Layout = null;
+    int sl = 0;
+}
+
+<div class="form-row">
+    <div class="form-group col-md-12">
+        <table class="table table-bordered table-sm table-responsive-lg" id="tblReportData">
+            <thead>
+                <tr class="btn-info text-center">
+                    <th>SL</th>
+                    <th>
+                        আদায়ের বিবরণ
+                    </th>
+                    <th class="hide">
+                        Amount
+                    </th>
+                    <th>
+                        টাকা
+                    </th>
+                    <th>
+                        খরচের বিবরণ
+                    </th>
+                    <th class="hide">
+                        Amount
+                    </th>
+                    <th>
+                        টাকা
+                    </th>
+                    <th class="hide">
+
+                    </th>
+                    <th class="hide">
+
+                    </th>
+                    <th class="hide">
+
+                    </th>
+                    <th class="hide">
+
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    sl = sl + 1;
+                    string revName = string.Empty;
+                    string exName = string.Empty;
+                    if (item.FIName == "পার্কিং")
+                    {
+                        revName = (item.RevRecDate + " - " + item.RevenueName);
+                        exName = (item.RevRecDate + " - " + item.ExpenseName);
+                    }
+                    else
+                    {
+                        revName = item.RevAmountBN;
+                    }
+                    <tr class="font-weight-bold">
+                        <td class="text-center">@sl</td>
+                        <td>
+                            @revName
+                        </td>
+                        <td class="hide">
+                            @item.RevAmount
+                        </td>
+                        <td>
+                            @item.RevAmountBN
+                        </td>
+                        <td>
+                            @exName
+                        </td>
+                        <td class="hide">
+                            @item.ExpAmount
+                        </td>
+                        <td>
+                            @item.ExpAmountBN
+                        </td>
+                        <td class="hide">
+                            @item.TotalRevenue
+                        </td>
+                        <td class="hide">
+                            @item.TotalRevenueBN
+                        </td>
+                        <td class="hide">
+                            @item.TotalExpense
+                        </td>
+                        <td class="hide">
+                            @item.TotalExpenseBN
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count() == 0)
+                {
+                    <tr class="text-center empty-row">
+                        <td colspan="11"> কোন ডাটা পাওয়া যায়নি </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                @if (Model.Count() > 0)
+                {
+                    <tr class="btn-warning font-weight-bold">
+                        <td></td>
+                        <td>মোট আয়</td>
+                        <td class="hide"></td>
+                        <td>@Model.FirstOrDefault().TotalRevenueBN</td>
+                        <td>মোট ব্যয়</td>
+                        <td class="hide"></td>
+                        <td>@Model.FirstOrDefault().TotalExpenseBN</td>
+                        <td class="hide"></td>
+                        <td class="hide"></td>
+                        <td class="hide"></td>
+                        <td class="hide"></td>
+                    </tr>
+                }
+            </tfoot>
+        </table>
+    </div>
+</div>
+

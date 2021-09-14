@@ -1,0 +1,587 @@
+﻿@model RevenueAndExpense.BO.ViewModels.VmShopModel
+@{
+    int sl = 0;
+    int sl2 = 0;
+}
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h4>@ViewBag.PageTitle</h4>
+        <hr />
+    </div>
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-4">
+                <a href="/Organization/GetShops" class="btn btn-primary" title="লিস্টে ফিরে যান"><i class="fas fa-arrow-left"></i></a>
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-success float-right" id="btnSubmit" title="Save"><i class="fas fa-save"></i> সেভ করুন </button>
+            </div>
+        </div>
+        <hr />
+    </div>
+    <div class="col-md-12">
+        <form id="frmShop">
+            @Html.HiddenFor(model => model.Shop.ShopId, new { @id = "hdfShopId" })
+            <div class="form-row">
+                <h6 style="color:#ff6a00">জমিদারের ইনফরমেশান</h6>
+            </div>
+            <hr />
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="txtLandOwnerName" class="control-label font-weight-bold">জমিদারের নামঃ</label>
+                    @Html.TextBoxFor(model => model.Shop.LandOwner, new { @class = "form-control", id = "txtLandOwnerName", maxlength = "100" })
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="txtLandOwnerAddress" class="control-label font-weight-bold">জমিদারের ঠিকানাঃ</label>
+                    @Html.TextAreaFor(model => model.Shop.LandOwnerAddress, new { @class = "form-control", id = "txtLandOwnerAddress", maxlength = "150", @rows = "3", @cols = "20" })
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="txtLandOwnerMobile" class="control-label font-weight-bold">জমিদারের ফোন নম্বরঃ</label>
+                    @Html.TextBoxFor(model => model.Shop.LandOwnerMobile, new { @class = "form-control", id = "txtLandOwnerMobile", maxlength = "100" })
+                </div>
+            </div>
+            <hr />
+            <div class="form-row">
+                <h6 style="color:#ff6a00">শপের মালিকের ইনফরমেশান</h6>
+            </div>
+            <hr />
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="txtShopName" class="control-label font-weight-bold">শপের নামঃ</label>
+                    @Html.TextBoxFor(model => model.Shop.ShopName, new { @class = "form-control", id = "txtShopName", maxlength = "100" })
+                    <span class="error hide required-shopName">দোকানের নাম আবশ্যক</span>
+                    <span class="error hide duplicate-shopName">এই নামে ইতিমধ্যে দোকান আছে</span>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="" class="control-label font-weight-bold">মালিকের নামঃ</label>
+                    @Html.TextBoxFor(model => model.Shop.ProprietorName, new { @class = "form-control", id = "txtProprietorName", maxlength = "100" })
+                    <span class="error hide required-proprietorName">মালিকের নাম আবশ্যক</span>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="txtMobileNo" class="control-label font-weight-bold">মোবাইল নম্বরঃ</label>
+                    @Html.TextBoxFor(model => model.Shop.MobileNo, new { @class = "form-control", id = "txtMobileNo", maxlength = "100" })
+                    <span class="error hide required-mobileNo">মোবাইল নম্বর আবশ্যক</span>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="txtEmail" class="control-label font-weight-bold">ই-মেইলঃ</label>
+                    @Html.TextBoxFor(model => model.Shop.Email, new { @class = "form-control", id = "txtEmail", maxlength = "100" })
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="txtAddress" class="control-label font-weight-bold">বাড়ির ঠিকানাঃ</label>
+                    @Html.TextAreaFor(model => model.Shop.HomeAddress, new { @class = "form-control", id = "txtAddress", maxlength = "150", @rows = "3", @cols = "20" })
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="txtRegistrationNo" class="control-label font-weight-bold">রেজিঃ নংঃ</label>
+                    @Html.TextBoxFor(model => model.Shop.RegistrationNo, new { @class = "form-control", id = "txtRegistrationNo", maxlength = "100" })
+                </div>
+            </div>
+            <hr />
+            <div class="form-row">
+                <h6 style="color:#ff6a00">ভাড়াটিয়ার ইনফরমেশান</h6>
+            </div>
+            <hr />
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="txtLeaseholderName" class="control-label font-weight-bold">ভাড়াটিয়ার নামঃ</label>
+                    @Html.TextBoxFor(model => model.Shop.LeaseholderName, new { @class = "form-control", id = "txtLeaseholderName", maxlength = "100" })
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="txtLeaseholderAddress" class="control-label font-weight-bold">ভাড়াটিয়ার ঠিকানাঃ</label>
+                    @Html.TextBoxFor(model => model.Shop.LeaseholderAddress, new { @class = "form-control", id = "txtLeaseholderAddress", maxlength = "200" })
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="txtLeaseholderPhone" class="control-label font-weight-bold">ভাড়াটিয়ার মোবাইল নম্বরঃ</label>
+                    @Html.TextBoxFor(model => model.Shop.LeaseholderPhone, new { @class = "form-control", id = "txtLeaseholderPhone", maxlength = "100" })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="txtNIDNo" class="control-label font-weight-bold">ভোটার আইডি কার্ড নম্বরঃ</label>
+                    @Html.TextBoxFor(model => model.Shop.NIDNo, new { @class = "form-control", id = "txtNIDNo", maxlength = "100" })
+                </div>
+                <div class="form-group col-md-4">
+                </div>
+                <div class="form-group col-md-4">
+                </div>
+            </div>
+            <hr />
+            <div class="form-row">
+                <h6>শপ ইনফরমেশান</h6>
+            </div>
+            <hr />
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="ddlStateStatus" class="control-label font-weight-bold">বর্তমান অবস্থাঃ</label>
+                    @Html.DropDownListFor(model => model.Shop.StateStatus, (IEnumerable<SelectListItem>)ViewBag.DDLStateStatus, new { @class = "form-control", @id = "ddlStateStatus" })
+                    <span class="error hide required-status">বর্তমান অবস্থা আবশ্যক</span>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="txtMeterNo" class="control-label font-weight-bold">মিটার নম্বরঃ</label>
+                    @Html.TextBoxFor(model => model.Shop.MeterNo, new { @class = "form-control", id = "txtMeterNo", maxlength = "200" })
+                    <span class="error hide required-meterNo">মিটার নম্বর আবশ্যক</span>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="txtShopSize" class="control-label font-weight-bold">শপের আয়তনঃ</label>
+                    @Html.TextBoxFor(model => model.Shop.ShopSize, new { @class = "form-control", id = "txtShopSize", maxlength = "100" })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="txtRemarks" class="control-label font-weight-bold">মন্ত্যবঃ</label>
+                    @Html.TextBoxFor(model => model.Shop.Remarks, new { @class = "form-control", id = "txtRemarks", maxlength = "200" })
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="ddlFloor" class="control-label font-weight-bold">ফ্লোর নংঃ</label>
+                    <select id="ddlFloor" class="form-control" name="FloorId">
+                        <option value="">ফ্লোর সিলেক্ট করুন</option>
+                    </select>
+                    <span class="error hide required-floor">ফ্লোর নং আবশ্যক</span>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="" class="control-label font-weight-bold">হোল্ডিং নং</label>
+                    <input type="text" value="" id="txtHoldingNo" class="form-control" />
+                    <span class="error hide required-holding">অন্তত একটি হোল্ডিং নং আবশ্যক</span>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6"></div>
+                <div class="form-group col-md-6">
+                    <span class="error hide duplicate-holding">হোল্ডিংটি ইতিমধ্যে আপনি সংযুক্ত করেছেন।</span>
+                    <br />
+                    <table class="table table-bordered table-sm table-responsive-lg" id="tblHolding">
+                        <thead class="btn-warning text-center">
+                            <tr>
+                                <th class="hide"></th>
+                                <th width="15%">সিরিয়াল</th>
+                                <th class="hide"></th>
+                                <th>হোল্ডিং নং</th>
+                                <th width="25%">অ্যাকশান</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.ShopHoldings)
+                            {
+                                sl = sl + 1;
+                                <tr>
+                                    <td class='hide'>@item.ShopId</td>
+                                    <td width="15%" class="text-center">@sl</td>
+                                    <td class='hide'>@item.HoldingId</td>
+                                    <td>@item.HoldingNo</td>
+                                    <td class="text-center" width="25%"><a href='#' class='btn btn-sm btn-danger data-del-holding' data-del-holding='0'>ডিলেট</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="txtFundName" class="control-label font-weight-bold">ফান্ডের নাম</label>
+                    <select class="form-control form-control-sm" id="ddlFundInfo">
+                        <option value="">ফান্ড সিলেক্ট করুন</option>
+                    </select>
+                    <span class="error hide required-FundNameBN">ফান্ডের নাম আবশ্যক</span>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="txtFundName" class="control-label font-weight-bold">শপের চার্জ সমূহ</label>
+                    <input type="text" name="" value="" id="txtFundDetailsNameBN" class="form-control" maxlength="200" />
+                    <span class="error hide required-shopCharge">অন্তত একটি চার্জ আবশ্যক</span>
+                </div>
+                <div class="form-group col-md-4"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-8">
+                    <span class="error hide duplicate-charge">চার্জটি ইতিমধ্যে আপনি সংযুক্ত করেছেন।</span>
+                    <br />
+                    <table class="table table-bordered table-sm table-responsive-lg" id="tblShopCharge">
+                        <thead class="btn-dark">
+                            <tr class="text-center">
+                                <td width="15%">সিরিয়াল</td>
+                                <td class="hide"></td>
+                                <td width="25%">ফান্ডের নাম</td>
+                                <td class="hide"></td>
+                                <td>চার্জ সমূহ</td>
+                                <td>টাকা</td>
+                                <td width="15%">অ্যাকশান</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.ShopCharges)
+                            {
+                                sl2 = sl2 + 1;
+                                <tr>
+                                    <td width="15%">@sl2</td>
+                                    <td class='hide'>@item.FundInfoId</td>
+                                    <td class='20%'>@item.FundNameBN</td>
+                                    <td class="hide">@item.FundDetailId</td>
+                                    <td>@item.FundDetailNameBN</td>
+                                    <td width="15%"><input type="number" name="" value="@item.ChargeAmountEN" id="txtAmount" class="form-control form-control-sm charge-amount" /></td>
+                                    <td class="text-center"><a href='#' class='btn btn-sm btn-danger data-del-charge' data-del-charge='0'>ডিলেট</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="form-group col-md-4"></div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        var txtShopName = $("#txtShopName");
+        var txtProprietorName = $("#txtProprietorName");
+        var txtMobileNo = $("#txtMobileNo");
+        var ddlFloor = $("#ddlFloor");
+        var txtEmail = $("#txtEmail");
+        var txtAddress = $("#txtAddress");
+        var txtRegistrationNo = $("#txtRegistrationNo");
+        var ddlStateStatus = $("#ddlStateStatus");
+        var txtHoldingNo = $("#txtHoldingNo");
+        var hdfShopId = $("#hdfShopId");
+        var ddlFundInfo = $("#ddlFundInfo");
+        var txtFundDetailsNameBN = $("#txtFundDetailsNameBN");
+
+        // New Elements //
+        var txtLandOwnerName = $("#txtLandOwnerName");
+        var txtLandOwnerAddress = $("#txtLandOwnerAddress");
+        var txtLandOwnerMobile = $("#txtLandOwnerMobile");
+
+        var txtLeaseholderName = $("#txtLeaseholderName");
+        var txtLeaseholderAddress = $("#txtLeaseholderAddress");
+        var txtLeaseholderPhone = $("#txtLeaseholderPhone");
+        var txtNIDNo = $("#txtNIDNo");
+
+        var txtMeterNo = $("#txtMeterNo");
+        var txtShopSize = $("#txtShopSize");
+        var txtRemarks = $("#txtRemarks")
+
+        function clearControl() {
+            txtShopName.val('');
+            txtProprietorName.val('');
+            txtMobileNo.val('');
+            ddlFloor.val('');
+            txtEmail.val('');
+            txtAddress.val('');
+            txtRegistrationNo.val('');
+            ddlStateStatus.val('');
+            hdfShopId.val('0');
+
+            txtLandOwnerName.val('');
+            txtLandOwnerAddress.val('');
+            txtLandOwnerMobile.val('');
+
+            txtLeaseholderName.val('');
+            txtLeaseholderAddress.val('');
+            txtLeaseholderPhone.val('');
+            txtNIDNo.val('');
+
+            txtMeterNo.val('');
+            txtShopSize.val('');
+            txtRemarks.val('');
+        }
+
+        ddlFloor.change(function () {
+            $("#tblHolding tbody").empty();
+            txtHoldingNo.val('');
+        })
+
+        $(document).ready(function () {
+            LoadDropDown3('/Common/GetFloorsForDDL', 'POST', ddlFloor, '@Model.Shop.FloorId');
+            LoadDropDown3('/Common/GetFundInfoForDDL', 'POST', ddlFundInfo,'6');
+        })
+
+        var objData = {};
+
+        txtHoldingNo.autocomplete({
+            source: function (request, response) {
+                var id = TryParseInt(ddlFloor.val(), 0);
+                $.ajax({
+                    url: '@Url.Action("GetHoldingNo", "Common")',
+                    type: 'POST',
+                    dataType: dataType.json,
+                    data: { floorId: id, contextKey: txtHoldingNo.val() },
+                    success: function (data) {
+                        objData = {};
+                        response($.map(data, function (item) {
+                            return { label: item.text, value: item.text, id: item.value };
+                        }))
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Holding no autocomplete error");
+                        console.log(error);
+                    }
+                })
+            },
+            select: function (event,ui) {
+                console.log(ui);
+                if (TryParseInt(ui.item.id,0) > 0)
+                {
+                    objData = {};
+                    objData = ui.item;
+                    dataObjPassingforBind(objData);
+                }
+                txtHoldingNo.val('');
+                ui.item.value = "";
+                ui.item.id = "";
+            },
+            messages: {
+                noResults: "failure"
+            },
+            minLength: 0
+        }).focus(function () {
+            $(this).autocomplete("search")
+            });
+
+        function dataObjPassingforBind(obj) {
+            if (!($.isEmptyObject(obj))) {
+                bindShopHolding(obj);
+            }
+        }
+
+        function bindShopHolding(obj) {
+            $(".duplicate-holding").addClass("hide");
+            if ($("#tblHolding tbody tr").length == 0) {
+                tblBindHolding(obj);
+            }
+            else {
+                var isExist = false;
+                var count = 0;
+                $.each($("#tblHolding tbody tr"), function (index, item) {
+                    var id = $(this).find("td:eq(2)").html();
+                    console.log("Table id");
+                    console.log(item);
+                    if (obj.id == id) {
+                        isExist = true;
+                        return false;
+                    }
+                })
+                if (!isExist) {
+                    tblBindHolding(obj);
+                }
+                else {
+                    $(".duplicate-holding").removeClass("hide");
+                }
+            }
+        }
+
+        function tblBindHolding(obj) {
+            var tbody = $("#tblHolding tbody");
+            var shopid = TryParseInt(obj.label, 0);
+            var rowCount = $("#tblHolding tbody tr").length;
+            var td1 = "<td class='hide'>" + shopid + "</td>";
+            var td2 = "<td class='text-center'>" + (rowCount + 1) + "</td>";
+            var td3 = "<td class='hide'>" + obj.id + "</td>";
+            var td4= "<td>" + obj.value + "</td>";
+            var td5 = "<td class='text-center'><a href='#' class='btn btn-sm btn-danger data-del-holding' data-del-holding='0'>ডিলেট</a></td>";
+            var tr = "<tr>"+td1 + td2 + td3 + td4+td5+"</tr>";
+            tbody.append(tr);
+            txtHoldingNo.val('');
+        }
+
+        function validateForm() {
+            var isValid = true;
+            $(".error").addClass("hide");
+            if ($.trim(txtShopName.val()) == '') {
+                $(".required-shopName").removeClass("hide");
+                isValid = false;
+            }
+            if ($.trim(txtProprietorName.val()) == '') {
+                $(".required-proprietorName").removeClass("hide");
+                isValid = false;
+            }
+            if ($.trim(txtMobileNo.val()) == '') {
+                $(".required-mobileNo").removeClass("hide");
+                isValid = false;
+            }
+            if (ddlFloor.val() == '') {
+                $(".required-floor").removeClass("hide");
+                isValid = false;
+            }
+            if (ddlStateStatus.val() == '') {
+                $(".required-status").removeClass("hide");
+                isValid = false;
+            }
+            if ($("#tblHolding tbody tr").length == 0) {
+                $(".required-holding").removeClass("hide");
+                isValid = false;
+            }
+            if ($("#tblShopCharge tbody tr").length == 0)
+            {
+                $(".required-shopCharge").removeClass("hide");
+                isValid = false;
+            }
+
+            if (txtMeterNo.val().trim() == '')
+            {
+                $(".required-meterNo").removeClass('hide');
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        $("#btnSubmit").click(function (e) {
+            e.preventDefault();
+            if (validateForm() == true) {
+                //disable("#btnSubmit");
+
+                // Holdings
+                var holding = [];
+                holding.length = 0;
+                $.each($("#tblHolding tbody tr"), function (index, item) {
+                    var id = $(this).find("td:eq(0)").html();
+                    var hid = $(this).find("td:eq(2)").html();
+                    var hno = $(this).find("td:eq(3)").html();
+                    holding.push({ ShopId: id, HoldingId: hid, HoldingNo: hno });
+                })
+
+                var charges = [];
+                charges.length = 0;
+                var id = hdfShopId.val() == '' ? 0 : TryParseInt(hdfShopId.val(), 0);
+
+                $.each($("#tblShopCharge tbody tr"), function (index, item) {
+                    var fid = $(this).find("td:eq(1)").html();
+                    var fdid = $(this).find("td:eq(3)").html();
+                    var fdName = $(this).find("td:eq(4)").html();
+                    var txtVal = $(this).find("td:eq(5)").children("input[type='number']").val();
+                    var bnAmount = fnConvertEnNumToBnNum(txtVal.toString());
+                    charges.push({ ShopId: id, FundInfoId: fid, FundDetailId: fdid, ChargeName: fdName, ChargeAmountEN: txtVal, ChargeAmountBN: bnAmount})
+                })
+
+                console.log("Shop Charges");
+                console.log(charges);
+
+                var data = JSON.stringify({
+                    ShopId: id, ShopName: txtShopName.val(), ProprietorName: txtProprietorName.val(), MobileNo: txtMobileNo.val(),
+                    Email: txtEmail.val(), HomeAddress: txtAddress.val(), RegistrationNo: txtRegistrationNo.val(), StateStatus: ddlStateStatus.val(), LandOwner: txtLandOwnerName.val().trim(), LandOwnerMobile: txtLandOwnerMobile.val().trim(), LandOwnerAddress: txtLandOwnerAddress.val().trim(), LeaseholderName: txtLeaseholderName.val(), LeaseholderAddress: txtLeaseholderAddress.val(), LeaseholderPhone: txtLeaseholderPhone.val().trim(), NIDNo: txtNIDNo.val(), MeterNo: txtMeterNo.val(), ShopSize: txtShopSize.val(), Remarks: txtRemarks.val(), FloorId: ddlFloor.val(), Holdings: holding,Charges: charges
+                })
+
+                console.log("Final Data");
+                console.log(data);
+
+                $.when(postReqWithData(dataType.applicationJson, dataType.json, 'POST', '/Organization/SaveShop', data)).then(function (res, status) {
+                    console.log(res);
+                    console.log(status);
+                    if (res == true) {
+                        enable("#btnSubmit");
+                        alert(execuStatus.successSave)
+                        window.location.replace('@Url.Action("GetShops")');
+                    }
+                    
+                }).fail(function (error) {
+                    console.log(error);
+                    enable("#btnSubmit");
+                })
+            }
+        })
+
+        // Fund Detail AutoComplete
+        txtFundDetailsNameBN.autocomplete({
+            source: function (request, response) {
+                var id = TryParseInt(ddlFundInfo.val(), 0);
+                $.ajax({
+                    url: '@Url.Action("GetFundDetailsWithTypeByFundInfoId", "Common")',
+                    type: 'POST',
+                    dataType: dataType.json,
+                    data: { fundId: id, contextKey: txtFundDetailsNameBN.val() },
+                    success: function (data) {
+                        objData = {};
+                        //console.log('autoooo');
+                        //console.log(data);
+                        response($.map(data, function (item) {
+                            //console.log(item);
+                            return { label: item.text, value: item.text, id: item.value,amount:item.amount };
+                        }))
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Holding no autocomplete error");
+                        console.log(error);
+                    }
+                })
+            },
+            select: function (event,ui) {
+                console.log(ui);
+                if (TryParseInt(ui.item.id,0) > 0)
+                {
+                    objData = {};
+                    objData = ui.item;
+                    //txtFundDetailsNameBN.val(ui.item.value);
+                    if (!($.isEmptyObject(objData))) {
+                        bindShopCharges(objData);
+                    }
+                }
+                txtFundDetailsNameBN.val('');
+                ui.item.value = "";
+                ui.item.id = "";
+            },
+            messages: {
+                noResults: "failure"
+            },
+            minLength: 0
+        }).focus(function () {
+            $(this).autocomplete("search")
+            });
+
+        function bindShopCharges(obj) {
+            $(".duplicate-charge").addClass("hide");
+            if ($("#tblShopCharge tbody tr").length == 0) {
+                tblBindShopCharge(obj);
+            }
+            else {
+                var isExist = false;
+                var count = 0;
+                $.each($("#tblShopCharge tbody tr"), function (index, item) {
+                    var id = $(this).find("td:eq(3)").html();
+                    console.log("Table id");
+                    console.log(item);
+                    if (obj.id == id) {
+                        isExist = true;
+                        return false;
+                    }
+                })
+                if (!isExist) {
+                    tblBindShopCharge(obj);
+                }
+                else {
+                    $(".duplicate-charge").removeClass("hide");
+                }
+            }
+        }
+
+        function tblBindShopCharge(obj) {
+
+            var tbody = $("#tblShopCharge tbody");
+            var fiTxt = ddlFundInfo.children(":selected").text();
+            var fdid = TryParseInt(obj.id, 0);
+            var rowCount = $("#tblShopCharge tbody tr").length;
+            var td1 = "<td width='15%' class='text-center'>" + (rowCount+1) + "</td>";
+            var td2 = "<td class='hide'>" + ddlFundInfo.val() + "</td>";
+            var td3 = "<td width='20%'>" + fiTxt + "</td>";
+            var td4 = "<td class='hide'>" + fdid + "</td>";
+            var td5 = "<td>" + obj.label + "</td>";
+            var td6 = '<td width="15%"><input type="number" name="" value="' + obj.amount+'" id="txtAmount" class="form-control form-control-sm charge-amount" /></td>'
+            var td7 = "<td class='text-center'><a href='#' class='btn btn-sm btn-danger data-del-charge' data-del-charge='0'>ডিলেট</a></td>";
+            var tr = "<tr>" + td1 + td2 + td3 + td4 + td5 + td6+td7+"</tr>";
+            tbody.append(tr);
+            txtHoldingNo.val('');
+        }
+
+
+        $(document).on('click', 'a.data-del-holding', function (e) {
+            e.preventDefault();
+            var index = $(this).parent().parents('tbody tr').index();
+            removeTableRow("#tblHolding tbody", index);
+        })
+
+        $(document).on('click', 'a.data-del-charge', function (e) {
+            e.preventDefault();
+            var index = $(this).parent().parents('tbody tr').index();
+            removeTableRow("#tblShopCharge tbody", index);
+        })
+    </script>
+}
+

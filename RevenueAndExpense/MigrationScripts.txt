@@ -1,0 +1,14 @@
+
+To clear - cls
+
+Enable-Migrations -ConfigurationTypeName RevenueAndExpense.Migrations.Configuration
+
+Add-Migration '' -ConfigurationTypeName RevenueAndExpense.Migrations.Configuration
+
+Update-database -ConfigurationTypeName RevenueAndExpense.Migrations.Configuration
+
+--- Scripts
+Update-database -script -ConfigurationTypeName RevenueAndExpense.Migrations.Configuration
+
+
+
